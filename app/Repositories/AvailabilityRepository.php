@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Booking;
+use App\Models\Room;
+use App\Models\RoomAvailability;
+use Illuminate\Database\Eloquent\Collection;
+
+class AvailabilityRepository
+{
+    /**
+     * Return all blocked/booked date records for a room in a given range.
+     * Used to build calendar views (returns dates only, not full records).
+     */
+    public function unavailableDatesForRoom(int $roomId, string $from, string $to): Collection
+    {
+        return RoomAvailability::where('room_id', $roomId)
+            ->unavailable()
+            ->inRange($from, $to)
+            ->get();
+    }
+
+    /**
+     * Return all dates that are blocked across ALL rooms of a given room type.
+     * A date is "fully blocked" only when every room of the type is blocked on that date.
+     */
+    public function fullyBlockedDatesForType(int $roomTypeId, string $from, string $to): array
+    {
+        $roomIds = Room::where('room_type_id', $roomTypeId)->available()->pluck('id')->toArray();
+
+        if (empty($roomIds)) {
+            return [];
+        }
+
+        $totalRooms = count($roomIds);
+
+        // Count how many rooms are blocked per date
+        $blockedCounts = RoomAvailability::whereIn('room_id', $roomIds)
+            ->unavailable()
+            ->inRange($from, $to)
+            ->selectRaw('date, COUNT(DISTINCT room_id) as blocked_count')
+            ->groupBy('date')
+            ->pluck('blocked_count', 'date')
+            ->toArray();
+
+        // A date is fully sold out only if blocked_count equals total rooms
+        return array_keys(array_filter($blockedCounts, fn ($count) => $count >= $totalRooms));
+    }
+
+    /**
+     * Persist availability blocks when a booking is confirmed.
+     */
+    public function blockForBooking(Room $room, Booking $booking): void
+    {
+        $room->blockForBooking($booking);
+    }
+
+    /**
+     * Release availability records for a cancelled booking.
+     */
+    public function releaseForBooking(Room $room, Booking $booking): void
+    {
+        $room->releaseBooking($booking);
+    }
+
+    /**
+     * Release all rooms attached to a booking at once (for cancellations).
+     */
+    public function releaseAllForBooking(Booking $booking): void
+    {
+        RoomAvailability::where('booking_id', $booking->id)->delete();
+    }
+}
