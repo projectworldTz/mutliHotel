@@ -87,7 +87,7 @@ class HotelRepository
 
     public function allForAdmin(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $query = Hotel::with(['owner', 'category'])->latest();
+        $query = Hotel::with(['owner', 'category', 'featuredImage'])->latest();
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -95,6 +95,14 @@ class HotelRepository
 
         if (! empty($filters['search'])) {
             $query->search($filters['search']);
+        }
+
+        if (! empty($filters['city'])) {
+            $query->inCity($filters['city']);
+        }
+
+        if (! empty($filters['star_rating'])) {
+            $query->byStars((int) $filters['star_rating']);
         }
 
         return $query->paginate($perPage)->withQueryString();

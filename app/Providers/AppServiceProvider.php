@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\BookingCancelled;
+use App\Events\BookingCreated;
+use App\Listeners\SendBookingCancellationEmail;
+use App\Listeners\SendBookingConfirmationEmail;
+use App\Models\Hotel;
+use App\Models\User;
 use App\Repositories\AvailabilityRepository;
 use App\Repositories\BookingRepository;
 use App\Repositories\HotelRepository;
@@ -16,6 +22,8 @@ use App\Services\Payments\CashGateway;
 use App\Services\Payments\PayPalGateway;
 use App\Services\Payments\StripeGateway;
 use App\Services\PricingService;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -72,15 +80,20 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        // ── Legacy e-commerce bindings (kept until Phase 11 cleanup) ──────────
-        $this->app->singleton(\App\Repositories\ProductRepository::class);
-        $this->app->singleton(\App\Repositories\OrderRepository::class);
-        $this->app->singleton(\App\Services\ProductService::class);
-        $this->app->singleton(\App\Services\OrderService::class);
     }
 
     public function boot(): void
     {
-        //
+        // ── Gates ─────────────────────────────────────────────────────────────
+        Gate::define('access-admin', fn (User $user) => $user->isSuperAdmin());
+        Gate::define('access-owner', fn (User $user) => $user->isHotelOwner() || $user->isSuperAdmin());
+        Gate::define('manage-hotel', fn (User $user, Hotel $hotel) =>
+            $user->isSuperAdmin() || $hotel->isOwnedBy($user)
+        );
+
+        // ── Event → Listener wiring ───────────────────────────────────────────
+        Event::listen(BookingCreated::class,   SendBookingConfirmationEmail::class);
+        Event::listen(BookingCancelled::class, SendBookingCancellationEmail::class);
+
     }
 }

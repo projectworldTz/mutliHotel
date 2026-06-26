@@ -156,7 +156,61 @@ class Booking extends Model
 
     public function getTotalGuestsAttribute(): int
     {
-        return $this->guests_adults + $this->guests_children;
+        return ($this->guests_adults ?? 0) + ($this->guests_children ?? 0);
+    }
+
+    /** Alias so views can use $booking->guests */
+    public function getGuestsAttribute(): int
+    {
+        return $this->total_guests;
+    }
+
+    /** First room type on this booking — convenience for single-room bookings */
+    public function getRoomTypeAttribute(): ?RoomType
+    {
+        return $this->rooms->first()?->roomType;
+    }
+
+    /** Payment method from the linked Payment record */
+    public function getPaymentMethodAttribute(): ?string
+    {
+        return $this->payment?->method;
+    }
+
+    /** Payment status from the linked Payment record */
+    public function getPaymentStatusAttribute(): ?string
+    {
+        return $this->payment?->status;
+    }
+
+    /** Alias: sub_total for views that use $booking->subtotal */
+    public function getSubtotalAttribute(): float
+    {
+        return (float) ($this->attributes['sub_total'] ?? 0);
+    }
+
+    /** Alias: grand_total for views that use $booking->total_amount */
+    public function getTotalAmountAttribute(): float
+    {
+        return (float) ($this->attributes['grand_total'] ?? 0);
+    }
+
+    /** Alias: tax_total for views that use $booking->tax_amount */
+    public function getTaxAmountAttribute(): float
+    {
+        return (float) ($this->attributes['tax_total'] ?? 0);
+    }
+
+    /** Alias: discount_total for views that use $booking->discount_amount */
+    public function getDiscountAmountAttribute(): float
+    {
+        return (float) ($this->attributes['discount_total'] ?? 0);
+    }
+
+    /** Nightly rate from the first booking room */
+    public function getBasePriceAttribute(): float
+    {
+        return (float) ($this->rooms->first()?->nightly_rate ?? 0);
     }
 
     public function getIsCancellableAttribute(): bool

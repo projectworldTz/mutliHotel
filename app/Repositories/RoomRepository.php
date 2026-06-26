@@ -71,13 +71,13 @@ class RoomRepository
             ->toArray();
 
         if (empty($allIds)) {
-            return collect();
+            return new Collection();
         }
 
         $freeIds = RoomAvailability::filterAvailableRooms($allIds, $checkIn, $checkOut);
 
         if (empty($freeIds)) {
-            return collect();
+            return new Collection();
         }
 
         return Room::whereIn('id', $freeIds)->with(['roomType'])->get();

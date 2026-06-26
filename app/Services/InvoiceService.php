@@ -66,8 +66,10 @@ class InvoiceService
     {
         $invoice->loadMissing(['booking.hotel', 'booking.user', 'booking.rooms.roomType']);
 
-        $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $invoice])
-            ->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('pdf.invoice', [
+                'invoice' => $invoice,
+                'booking' => $invoice->booking,
+            ])->setPaper('a4', 'portrait');
 
         return $pdf->output();
     }

@@ -61,6 +61,11 @@ class HotelService
         return $this->repository->allForOwner($owner);
     }
 
+    public function allForAdmin(array $filters = [], int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->repository->allForAdmin($filters, $perPage);
+    }
+
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
     public function create(array $data, User $owner): Hotel

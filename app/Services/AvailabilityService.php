@@ -98,7 +98,7 @@ class AvailabilityService
         }
 
         // Sort cheapest first
-        usort($results, fn ($a, $b) => $a['pricing']['total'] <=> $b['pricing']['total']);
+        usort($results, fn ($a, $b) => $a['pricing']['subtotal'] <=> $b['pricing']['subtotal']);
 
         return $results;
     }

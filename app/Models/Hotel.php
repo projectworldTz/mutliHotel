@@ -83,6 +83,16 @@ class Hotel extends Model
         return $this->belongsToMany(Amenity::class, 'hotel_amenity');
     }
 
+    public function staff()
+    {
+        return $this->hasMany(HotelStaff::class);
+    }
+
+    public function activeStaff()
+    {
+        return $this->hasMany(HotelStaff::class)->where('active', true)->with('user');
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);

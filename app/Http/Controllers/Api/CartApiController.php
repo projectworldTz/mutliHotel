@@ -3,53 +3,98 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\CartItem;
+use App\Http\Requests\AddToCartRequest;
+use App\Models\ReservationCartItem;
+use App\Models\RoomType;
+use App\Services\BookingService;
+use App\Services\PricingService;
 use Illuminate\Http\Request;
 
 class CartApiController extends Controller
 {
-    public function index(Request $request)
-    {
-        return response()->json($request->user()->cartItems()->with('product')->get());
-    }
+    public function __construct(
+        private BookingService $bookingService,
+        private PricingService $pricingService,
+    ) {}
 
-    public function store(Request $request)
+    public function index()
     {
-        $data = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'integer|min:1',
+        $cart = $this->bookingService->getCart(auth()->user());
+
+        return response()->json([
+            'items'      => $cart->items,
+            'subtotal'   => $cart->sub_total,
+            'count'      => $cart->item_count,
+            'expires_at' => $cart->expires_at?->toIso8601String(),
         ]);
-
-        $user = $request->user();
-        $cart = $user->cart()->firstOrCreate([]);
-        $item = $cart->items()->firstOrNew(['product_id' => $data['product_id']]);
-        $item->quantity = $item->exists ? $item->quantity + ($data['quantity'] ?? 1) : ($data['quantity'] ?? 1);
-        $item->price = $item->product->price;
-        $item->save();
-
-        return response()->json($item, 201);
     }
 
-    public function update(Request $request, CartItem $item)
+    public function store(AddToCartRequest $request)
     {
-        if ($item->cart->user_id !== $request->user()->id) {
-            abort(403);
+        $roomType = RoomType::findOrFail($request->room_type_id);
+
+        try {
+            $this->bookingService->addToCart(
+                auth()->user(),
+                $roomType,
+                $request->check_in,
+                $request->check_out,
+                (int) $request->guests
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
 
-        $data = $request->validate(['quantity' => 'required|integer|min:1']);
-        $item->update(['quantity' => $data['quantity']]);
+        $cart = $this->bookingService->getCart(auth()->user());
 
-        return response()->json($item);
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Room added to your reservation.',
+            'count'    => $cart->item_count,
+            'subtotal' => $cart->sub_total,
+        ], 201);
     }
 
-    public function destroy(CartItem $item)
+    public function destroy(ReservationCartItem $item)
     {
-        if ($item->cart->user_id !== request()->user()->id) {
-            abort(403);
+        abort_unless($item->cart->user_id === auth()->id(), 403);
+
+        $this->bookingService->removeFromCart($item);
+
+        $cart = $this->bookingService->getCart(auth()->user());
+
+        return response()->json([
+            'success'  => true,
+            'count'    => $cart->item_count,
+            'subtotal' => $cart->sub_total,
+        ]);
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $request->validate(['code' => 'required|string|max:50']);
+
+        $cart    = $this->bookingService->getCart(auth()->user());
+        $hotelId = $cart->items->first()?->roomType?->hotel_id;
+
+        return response()->json(
+            $this->bookingService->applyCouponPreview(auth()->user(), $request->code, $hotelId)
+        );
+    }
+
+    public function preview(Request $request)
+    {
+        $cart   = $this->bookingService->getCart(auth()->user());
+        $coupon = null;
+
+        if ($request->filled('coupon_code')) {
+            $coupon = \App\Models\Coupon::where('code', strtoupper($request->coupon_code))
+                ->valid()
+                ->first();
         }
 
-        $item->delete();
-
-        return response()->json([], 204);
+        return response()->json(
+            $this->pricingService->calculateOrderTotal((float) $cart->sub_total, $coupon)
+        );
     }
 }

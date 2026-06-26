@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\BookingCancelled;
 use App\Models\Booking;
 use App\Models\BookingRoom;
 use App\Models\Coupon;
@@ -285,6 +286,9 @@ class BookingService
             $this->availabilityRepository->releaseAllForBooking($booking);
         });
 
+        $booking->refresh();
+        event(new BookingCancelled($booking));
+
         return $booking;
     }
 
@@ -316,6 +320,11 @@ class BookingService
         abort_if(is_null($booking), 404, 'Booking not found.');
 
         return $booking;
+    }
+
+    public function allPaginated(array $filters = [], int $perPage = 20): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->repository->allPaginated($filters, $perPage);
     }
 
     public function platformStats(): array
