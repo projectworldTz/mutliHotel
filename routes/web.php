@@ -192,6 +192,8 @@ Route::middleware('auth')->group(function () {
         // Users
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [AdminUserController::class, 'index'])->name('index');
+            Route::get('/create', [AdminUserController::class, 'create'])->name('create');
+            Route::post('/', [AdminUserController::class, 'store'])->name('store');
             Route::get('/{user}', [AdminUserController::class, 'show'])->name('show');
             Route::post('/{user}/roles', [AdminUserController::class, 'assignRole'])->name('assign-role');
             Route::delete('/{user}/roles/{role}', [AdminUserController::class, 'revokeRole'])->name('revoke-role');

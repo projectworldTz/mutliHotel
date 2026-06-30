@@ -3,7 +3,7 @@
 @section('page-title', __('Users'))
 
 @section('content')
-<div class="mb-5">
+<div class="mb-5 flex items-center justify-between gap-4 flex-wrap">
     <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-wrap gap-2">
         <input type="text" name="search" value="{{ request('search') }}"
                class="form-input w-56 py-2 text-sm" placeholder="{{ __('Name or email…') }}">
@@ -16,6 +16,9 @@
         <button type="submit" class="btn-primary btn-sm">{{ __('Filter') }}</button>
         <a href="{{ route('admin.users.index') }}" class="btn-ghost btn-sm">{{ __('Reset') }}</a>
     </form>
+    <a href="{{ route('admin.users.create') }}" class="btn-primary btn-sm whitespace-nowrap">
+        + {{ __('Add Hotel Owner') }}
+    </a>
 </div>
 
 <div class="card table-wrap">

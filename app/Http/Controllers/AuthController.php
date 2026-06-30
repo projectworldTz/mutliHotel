@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,11 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => $data['password'],
         ]);
+
+        $customerRole = Role::where('name', 'customer')->first();
+        if ($customerRole) {
+            $user->roles()->attach($customerRole->id);
+        }
 
         Auth::login($user);
 

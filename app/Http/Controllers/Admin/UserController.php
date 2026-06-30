@@ -11,6 +11,34 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    public function create()
+    {
+        return view('admin.users.create');
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = User::create([
+            'name'              => $data['name'],
+            'email'             => $data['email'],
+            'password'          => Hash::make($data['password']),
+            'email_verified_at' => now(),
+        ]);
+
+        $ownerRole = Role::where('name', 'hotel-owner')->firstOrFail();
+        $user->roles()->attach($ownerRole->id);
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', "Hotel owner account created for {$user->name}. They can now log in and register their hotel.");
+    }
+
     public function index(Request $request)
     {
         $users = User::query()
