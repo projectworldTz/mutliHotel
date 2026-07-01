@@ -60,7 +60,7 @@
                             {{ \Carbon\Carbon::parse($b->check_in)->format('d M') }} –
                             {{ \Carbon\Carbon::parse($b->check_out)->format('d M Y') }}
                         </td>
-                        <td class="font-semibold">TZS {{ number_format($b->grand_total ?? 0, 0) }}</td>
+                        <td class="font-semibold">{{ money($b->grand_total ?? 0) }}</td>
                         <td><span class="badge badge-{{ $b->status }}">{{ ucfirst($b->status) }}</span></td>
                         <td>
                             <a href="{{ route('booking.show', $b->booking_number) }}" class="btn-ghost btn-sm">{{ __('View') }}</a>

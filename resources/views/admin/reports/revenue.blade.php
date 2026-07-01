@@ -25,7 +25,7 @@
             <tr class="tr-hover">
                 <td>{{ $row['month'] }}</td>
                 <td>{{ $row['bookings'] ?? 0 }}</td>
-                <td class="font-semibold">TZS {{ number_format($row['total'] ?? 0, 0) }}</td>
+                <td class="font-semibold">{{ money($row['total'] ?? 0) }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -44,7 +44,7 @@
         data: {
             labels: data.map(r => r.month),  // already "Jun 2026" from controller
             datasets: [{
-                label: 'Revenue (TZS)',
+                label: 'Revenue ({{ config('app.currency') }})',
                 data: data.map(r => r.total),
                 borderColor: '#C9A227',
                 backgroundColor: 'rgba(201,162,39,0.15)',
@@ -57,7 +57,7 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { callback: v => 'TZS ' + v.toLocaleString() } } }
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '{{ config('app.currency') }} ' + v.toLocaleString() } } }
         }
     });
 })();

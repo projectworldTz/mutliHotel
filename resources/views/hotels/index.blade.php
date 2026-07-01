@@ -118,7 +118,7 @@
                                 <span class="text-sm font-bold text-navy dark:text-navy-light">
                                     @if($hotel->roomTypes->isNotEmpty())
                                         <span class="text-xs font-normal text-slate-400">{{ __('from') }}</span>
-                                        TZS {{ number_format($hotel->roomTypes->min('base_price'), 0) }}<span class="text-xs font-normal text-slate-400">/{{ __('night') }}</span>
+                                        {{ money($hotel->roomTypes->min('base_price')) }}<span class="text-xs font-normal text-slate-400">/{{ __('night') }}</span>
                                     @endif
                                 </span>
                             </div>

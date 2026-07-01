@@ -86,6 +86,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Default Platform Currency
+    |--------------------------------------------------------------------------
+    |
+    | The ISO 4217 currency code used across the platform (bookings, payments,
+    | invoices, reports) wherever no hotel/booking-specific currency is set.
+    | Single source of truth — change this instead of hardcoding a currency
+    | code or symbol anywhere else in the app.
+    |
+    */
+
+    'currency' => env('APP_CURRENCY', 'TZS'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Encryption Key
     |--------------------------------------------------------------------------
     |

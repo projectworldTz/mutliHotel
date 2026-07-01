@@ -39,12 +39,12 @@
                         {{ $booking->booking_number }}
                     </td>
                     <td class="text-sm">{{ $booking->user?->name ?? '—' }}</td>
-                    <td class="text-sm font-medium">TZS {{ number_format($approval->total_paid, 0) }}</td>
+                    <td class="text-sm font-medium">{{ money($approval->total_paid) }}</td>
                     <td class="text-sm font-semibold {{ $approval->isDenied() ? 'text-slate-400 line-through' : 'text-emerald-600 dark:text-emerald-400' }}">
-                        @if($approval->isDenied()) — @else TZS {{ number_format($approval->refund_amount, 0) }} @endif
+                        @if($approval->isDenied()) — @else {{ money($approval->refund_amount) }} @endif
                     </td>
                     <td class="text-sm font-semibold {{ $approval->isDenied() ? 'text-slate-400 line-through' : 'text-rose-600 dark:text-rose-400' }}">
-                        @if($approval->isDenied()) — @else TZS {{ number_format($approval->deduction_amount, 0) }} @endif
+                        @if($approval->isDenied()) — @else {{ money($approval->deduction_amount) }} @endif
                     </td>
                     <td>
                         <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $approval->statusColor() }}">

@@ -20,7 +20,7 @@
                 <div><p class="form-label mb-0.5">{{ __('Guest') }}</p><p class="font-medium">{{ $booking->user->name ?? 'N/A' }}</p><p class="text-slate-500">{{ $booking->user->email ?? '' }}</p></div>
                 <div><p class="form-label mb-0.5">{{ __('Hotel') }}</p><p class="font-medium">{{ $booking->hotel->name ?? 'N/A' }}</p><p class="text-slate-500">{{ $booking->hotel->city ?? '' }}</p></div>
                 <div><p class="form-label mb-0.5">{{ __('Payment') }}</p><p class="font-medium capitalize">{{ $booking->payment_method ?? 'N/A' }}</p><p class="text-slate-500 capitalize">{{ $booking->payment_status ?? '' }}</p></div>
-                <div><p class="form-label mb-0.5">{{ __('Total') }}</p><p class="text-xl font-bold text-navy dark:text-navy-light">TZS {{ number_format($booking->grand_total ?? 0, 0) }}</p></div>
+                <div><p class="form-label mb-0.5">{{ __('Total') }}</p><p class="text-xl font-bold text-navy dark:text-navy-light">{{ money($booking->grand_total ?? 0) }}</p></div>
             </div>
 
             @if($booking->special_requests)
@@ -43,7 +43,7 @@
                             <td>{{ \Carbon\Carbon::parse($item->check_in)->format('d M Y') }}</td>
                             <td>{{ \Carbon\Carbon::parse($item->check_out)->format('d M Y') }}</td>
                             <td>{{ $item->nights }}</td>
-                            <td class="font-semibold">TZS {{ number_format($item->sub_total ?? 0, 0) }}</td>
+                            <td class="font-semibold">{{ money($item->sub_total ?? 0) }}</td>
                         </tr>
                         @endforeach
                     </tbody>

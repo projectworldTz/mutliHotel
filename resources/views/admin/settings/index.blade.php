@@ -19,15 +19,22 @@
                 </div>
                 <div>
                     <label class="form-label">Support Email</label>
-                    <input type="email" name="settings[support_email]"
-                           value="{{ $settings['support_email'] ?? '' }}"
+                    <input type="email" name="settings[site_email]"
+                           value="{{ $settings['site_email'] ?? '' }}"
+                           class="form-input" required>
+                </div>
+                <div>
+                    <label class="form-label">Support Phone</label>
+                    <input type="text" name="settings[site_phone]"
+                           value="{{ $settings['site_phone'] ?? '' }}"
+                           placeholder="+255 700 000 000"
                            class="form-input">
                 </div>
                 <div>
                     <label class="form-label">Default Currency</label>
                     <select name="settings[currency]" class="form-select">
-                        @foreach(['USD','EUR','GBP','JPY','AED'] as $c)
-                        <option value="{{ $c }}" {{ ($settings['currency'] ?? 'USD') === $c ? 'selected' : '' }}>{{ $c }}</option>
+                        @foreach(['TZS','USD','EUR','GBP','JPY','AED'] as $c)
+                        <option value="{{ $c }}" {{ ($settings['currency'] ?? config('app.currency')) === $c ? 'selected' : '' }}>{{ $c }}</option>
                         @endforeach
                     </select>
                 </div>

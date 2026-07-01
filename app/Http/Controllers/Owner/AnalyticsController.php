@@ -211,12 +211,12 @@ class AnalyticsController extends Controller
         $pct = fn ($now, $prev) => $prev > 0 ? round((($now - $prev) / $prev) * 100, 1) : null;
 
         $kpis = [
-            ['label' => 'Total Revenue',       'value' => number_format($revenue, 2),       'prefix' => '$', 'suffix' => '',  'change' => $pct($revenue, $prevRevenue),       'color' => 'emerald'],
+            ['label' => 'Total Revenue',       'value' => number_format($revenue, 2),       'prefix' => config('app.currency') . ' ', 'suffix' => '',  'change' => $pct($revenue, $prevRevenue),       'color' => 'emerald'],
             ['label' => 'Bookings',            'value' => $bookingsCount,                   'prefix' => '',  'suffix' => '',  'change' => $pct($bookingsCount, $prevBookingsCount), 'color' => 'blue'],
             ['label' => 'Page Visits',         'value' => $visitsCount,                     'prefix' => '',  'suffix' => '',  'change' => $pct($visitsCount, $prevVisitsCount), 'color' => 'indigo'],
             ['label' => 'Occupancy Rate',      'value' => $occupancy,                       'prefix' => '',  'suffix' => '%', 'change' => $pct($occupancy, $prevOccupancy),   'color' => 'purple'],
-            ['label' => 'ADR',                 'value' => number_format($adr, 2),           'prefix' => '$', 'suffix' => '',  'change' => $pct($adr, $prevAdr),             'color' => 'amber'],
-            ['label' => 'RevPAR',              'value' => number_format($revpar, 2),        'prefix' => '$', 'suffix' => '',  'change' => $pct($revpar, $prevRevpar),        'color' => 'rose'],
+            ['label' => 'ADR',                 'value' => number_format($adr, 2),           'prefix' => config('app.currency') . ' ', 'suffix' => '',  'change' => $pct($adr, $prevAdr),             'color' => 'amber'],
+            ['label' => 'RevPAR',              'value' => number_format($revpar, 2),        'prefix' => config('app.currency') . ' ', 'suffix' => '',  'change' => $pct($revpar, $prevRevpar),        'color' => 'rose'],
             ['label' => 'Avg. Stay',           'value' => $avgStay,                         'prefix' => '',  'suffix' => 'n', 'change' => $pct($avgStay, $prevAvgStay),     'color' => 'slate'],
         ];
 

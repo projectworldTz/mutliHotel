@@ -126,8 +126,8 @@
         @foreach([
             [__('Total Bookings'),  $stats['total']        ?? 0,  'text-slate-900 dark:text-white', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
             [__('Active'),          ($stats['pending']??0) + ($stats['confirmed']??0) + ($stats['checked_in']??0), 'text-emerald-600 dark:text-emerald-400', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-            [__('This Month'),      'TZS ' . number_format($stats['revenue_month'] ?? 0, 0), 'text-navy dark:text-amber-400', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-            [__('Total Revenue'),   'TZS ' . number_format($stats['total_revenue'] ?? 0, 0), 'text-navy dark:text-amber-400', 'M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z'],
+            [__('This Month'),      money($stats['revenue_month'] ?? 0), 'text-navy dark:text-amber-400', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+            [__('Total Revenue'),   money($stats['total_revenue'] ?? 0), 'text-navy dark:text-amber-400', 'M9 14.25l6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0c1.1.128 1.907 1.077 1.907 2.185z'],
         ] as [$label, $val, $valClass, $icon])
         <div class="stat-card">
             <div class="flex items-center justify-between">
@@ -191,7 +191,7 @@
                         <td class="font-mono text-xs">{{ $b->booking_number }}</td>
                         <td>{{ $b->user->name ?? 'N/A' }}</td>
                         <td class="text-xs text-slate-500">{{ \Carbon\Carbon::parse($b->check_in)->format('d M') }} → {{ \Carbon\Carbon::parse($b->check_out)->format('d M Y') }}</td>
-                        <td class="font-semibold">TZS {{ number_format($b->grand_total, 0) }}</td>
+                        <td class="font-semibold">{{ money($b->grand_total) }}</td>
                         <td><span class="badge badge-{{ $b->status }}">{{ ucfirst($b->status) }}</span></td>
                     </tr>
                     @endforeach
@@ -216,7 +216,7 @@
                         <td class="font-medium">{{ $rt->name }}</td>
                         <td>{{ $rt->beds_count }}× {{ $rt->bed_type }}</td>
                         <td>{{ $rt->max_guests }}</td>
-                        <td>TZS {{ number_format($rt->base_price, 0) }}</td>
+                        <td>{{ money($rt->base_price) }}</td>
                         <td>{{ $rt->rooms->count() }}</td>
                     </tr>
                     @endforeach
@@ -242,7 +242,7 @@
                 return d.toLocaleString('default', { month: 'short', year: '2-digit' });
             }),
             datasets: [{
-                label: 'Revenue (TZS)',
+                label: 'Revenue ({{ config('app.currency') }})',
                 data: revenue.map(r => r.total),
                 backgroundColor: 'rgba(27, 58, 107, 0.75)',
                 borderColor: '#1B3A6B',
@@ -253,7 +253,7 @@
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { callback: v => 'TZS ' + v.toLocaleString() } } }
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '{{ config('app.currency') }} ' + v.toLocaleString() } } }
         }
     });
 })();
@@ -298,7 +298,7 @@
                     <td>{{ \Carbon\Carbon::parse($b->check_in)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($b->check_out)->format('d M Y') }}</td>
                     <td class="text-center">{{ $b->nights }}</td>
-                    <td class="font-semibold">TZS {{ number_format($b->grand_total, 0) }}</td>
+                    <td class="font-semibold">{{ money($b->grand_total) }}</td>
                     <td><span class="badge badge-{{ $b->status }}">{{ ucfirst(str_replace('_',' ',$b->status)) }}</span></td>
                     <td><a href="{{ route('admin.bookings.show', $b) }}" class="btn-ghost btn-sm">{{ __('View') }}</a></td>
                 </tr>
@@ -332,7 +332,7 @@
     {{-- Summary stats --}}
     <div class="grid gap-4 sm:grid-cols-3">
         @foreach([
-            [__('Total Revenue'),  'TZS ' . number_format($stats['total_revenue'] ?? 0, 0)],
+            [__('Total Revenue'),  money($stats['total_revenue'] ?? 0)],
             [__('Total Bookings'), $stats['total'] ?? 0],
             [__('Cancelled'),      $stats['cancelled'] ?? 0],
         ] as [$label, $val])
@@ -359,7 +359,7 @@
                     <tr class="tr-hover">
                         <td>{{ date('F Y', mktime(0,0,0,$r['month'],1,$r['year'])) }}</td>
                         <td class="text-right">{{ $r['bookings'] ?? '—' }}</td>
-                        <td class="text-right font-semibold">TZS {{ number_format($r['total'], 0) }}</td>
+                        <td class="text-right font-semibold">{{ money($r['total']) }}</td>
                     </tr>
                     @empty
                     <tr><td colspan="3" class="py-8 text-center text-slate-400">{{ __('No revenue data.') }}</td></tr>
@@ -384,7 +384,7 @@
                 return d.toLocaleString('default', { month: 'short', year: '2-digit' });
             }),
             datasets: [{
-                label: 'Revenue (TZS)',
+                label: 'Revenue ({{ config('app.currency') }})',
                 data: revenue.map(r => r.total),
                 backgroundColor: 'rgba(27, 58, 107, 0.75)',
                 borderColor: '#1B3A6B', borderWidth: 1, borderRadius: 4,
@@ -393,7 +393,7 @@
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { callback: v => 'TZS ' + v.toLocaleString() } } }
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '{{ config('app.currency') }} ' + v.toLocaleString() } } }
         }
     });
 })();
@@ -416,7 +416,7 @@
                 <div>
                     <h3 class="font-bold text-slate-900 dark:text-white">{{ $rt->name }}</h3>
                     <p class="text-xs text-slate-500">
-                        {{ $rt->beds_count }}× {{ $rt->bed_type }} · {{ __('Max') }} {{ $rt->max_guests }} {{ __('guests') }} · TZS {{ number_format($rt->base_price, 0) }}/{{ __('night') }}
+                        {{ $rt->beds_count }}× {{ $rt->bed_type }} · {{ __('Max') }} {{ $rt->max_guests }} {{ __('guests') }} · {{ money($rt->base_price) }}/{{ __('night') }}
                     </p>
                 </div>
             </div>
@@ -498,7 +498,7 @@
                     <td class="text-slate-500 text-sm">{{ $g->email }}</td>
                     <td class="text-center font-semibold">{{ $g->hotel_bookings_count }}</td>
                     <td class="text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                        TZS {{ number_format($g->hotel_spend ?? 0, 0) }}
+                        {{ money($g->hotel_spend ?? 0) }}
                     </td>
                     <td class="text-xs text-slate-400">{{ $g->updated_at->diffForHumans() }}</td>
                 </tr>

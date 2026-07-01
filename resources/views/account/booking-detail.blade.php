@@ -83,7 +83,7 @@
                             </p>
                         </div>
                         <p class="font-semibold text-slate-900 dark:text-white whitespace-nowrap">
-                            TZS {{ number_format($room->sub_total, 0) }}
+                            {{ money($room->sub_total) }}
                         </p>
                     </div>
                     @endforeach
@@ -97,13 +97,13 @@
             {{-- Price summary --}}
             <div class="card p-5 text-sm space-y-2">
                 <h3 class="font-bold text-slate-900 dark:text-white mb-3">{{ __('Price Summary') }}</h3>
-                <div class="flex justify-between"><span class="text-slate-500">{{ __('Subtotal') }}</span><span>TZS {{ number_format($booking->sub_total, 0) }}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">{{ __('Subtotal') }}</span><span>{{ money($booking->sub_total) }}</span></div>
                 @if($booking->discount_total > 0)
-                <div class="flex justify-between text-emerald-600"><span>{{ __('Discount') }}</span><span>−TZS {{ number_format($booking->discount_total, 0) }}</span></div>
+                <div class="flex justify-between text-emerald-600"><span>{{ __('Discount') }}</span><span>−{{ money($booking->discount_total) }}</span></div>
                 @endif
-                <div class="flex justify-between"><span class="text-slate-500">{{ __('Tax') }} ({{ $booking->tax_rate }}%)</span><span>TZS {{ number_format($booking->tax_total, 0) }}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">{{ __('Tax') }} ({{ $booking->tax_rate }}%)</span><span>{{ money($booking->tax_total) }}</span></div>
                 <div class="flex justify-between font-bold text-base border-t border-slate-200 dark:border-slate-700 pt-2 mt-1">
-                    <span>{{ __('Total') }}</span><span>TZS {{ number_format($booking->grand_total, 0) }}</span>
+                    <span>{{ __('Total') }}</span><span>{{ money($booking->grand_total) }}</span>
                 </div>
                 @if($booking->payment)
                 <div class="flex justify-between text-slate-500 pt-1">

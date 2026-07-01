@@ -80,7 +80,7 @@
                     </div>
                     <div class="text-right">
                         <div class="text-3xl font-bold text-navy dark:text-navy-light">
-                            TZS <span data-count="{{ $roomType->base_price }}"
+                            {{ config('app.currency') }} <span data-count="{{ $roomType->base_price }}"
                                       data-count-suffix=""
                                       class="tabular-nums">{{ number_format($roomType->base_price, 0) }}</span>
                         </div>
@@ -184,7 +184,7 @@
                 <div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ $roomType->name }}</h3>
                     <p class="text-2xl font-bold text-navy dark:text-navy-light mt-0.5">
-                        TZS {{ number_format($roomType->base_price, 0) }}<span class="text-sm font-normal text-slate-500"> / {{ __('night') }}</span>
+                        {{ money($roomType->base_price) }}<span class="text-sm font-normal text-slate-500"> / {{ __('night') }}</span>
                     </p>
                 </div>
 
@@ -210,12 +210,12 @@
                 {{-- Price summary --}}
                 <div x-show="nights > 0" class="rounded-xl bg-slate-50 dark:bg-slate-700/50 p-3 text-sm space-y-1">
                     <div class="flex justify-between text-slate-600 dark:text-slate-300">
-                        <span x-text="'TZS {{ number_format($roomType->base_price, 0) }} × ' + nights + ' {{ __('nights') }}'"></span>
-                        <span x-text="'TZS ' + ({{ $roomType->base_price }} * nights).toLocaleString()"></span>
+                        <span x-text="'{{ money($roomType->base_price) }} × ' + nights + ' {{ __('nights') }}'"></span>
+                        <span x-text="'{{ config('app.currency') }} ' + ({{ $roomType->base_price }} * nights).toLocaleString()"></span>
                     </div>
                     <div class="flex justify-between font-bold text-slate-900 dark:text-white pt-1 border-t border-slate-200 dark:border-slate-600">
                         <span>{{ __('Total') }}</span>
-                        <span x-text="'TZS ' + ({{ $roomType->base_price }} * nights).toLocaleString()"></span>
+                        <span x-text="'{{ config('app.currency') }} ' + ({{ $roomType->base_price }} * nights).toLocaleString()"></span>
                     </div>
                 </div>
 

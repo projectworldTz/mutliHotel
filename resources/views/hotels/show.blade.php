@@ -170,7 +170,7 @@
                             </div>
                             <div class="text-right">
                                 <div class="text-2xl font-bold text-navy dark:text-navy-light">
-                                    TZS {{ number_format($rt->base_price, 0) }}
+                                    {{ money($rt->base_price) }}
                                 </div>
                                 <div class="text-xs text-slate-500">{{ __('per night') }}</div>
                                 <a href="{{ route('hotels.room.show', [$hotel, $rt]) }}"
@@ -299,7 +299,7 @@
                                     <p class="text-xs text-slate-500" x-text="room.available_count + ' {{ __('rooms left') }}'"></p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-bold text-navy dark:text-navy-light" x-text="'$' + room.nightly_rate + '/{{ __('night') }}'"></p>
+                                    <p class="font-bold text-navy dark:text-navy-light" x-text="'{{ config('app.currency') }} ' + room.nightly_rate + '/{{ __('night') }}'"></p>
                                 </div>
                             </div>
                             @auth

@@ -155,7 +155,7 @@ class BookingController extends Controller
                 'tax_rate'         => $taxRate,
                 'discount_total'   => 0,
                 'grand_total'      => $grandTotal,
-                'currency'         => 'TZS',
+                'currency'         => config('app.currency'),
                 'special_requests' => $data['notes'] ?? null,
                 'confirmed_at'     => now(),
             ]);
@@ -176,7 +176,7 @@ class BookingController extends Controller
                 'method'     => $data['payment_method'],
                 'status'     => 'paid',
                 'amount'     => $grandTotal,
-                'currency'   => 'TZS',
+                'currency'   => config('app.currency'),
             ]);
 
             return $booking;

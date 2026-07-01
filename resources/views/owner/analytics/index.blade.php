@@ -174,8 +174,8 @@
                             <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 w-10 text-right">{{ $rt['occupancy'] }}%</span>
                         </div>
                     </td>
-                    <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-300">TZS {{ number_format($rt['adr'], 0) }}</td>
-                    <td class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">TZS {{ number_format($rt['revenue'], 0) }}</td>
+                    <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{{ money($rt['adr']) }}</td>
+                    <td class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-white">{{ money($rt['revenue']) }}</td>
                 </tr>
                 @empty
                 <tr><td colspan="5" class="px-4 py-8 text-center text-slate-400">{{ __('No booking data for this period.') }}</td></tr>
@@ -269,7 +269,7 @@ new Chart(document.getElementById('revenueChart'), {
         plugins: { legend: { display: false } },
         scales: {
             x: { grid: { color: gridColor }, ticks: { color: labelColor, maxTicksLimit: 8, maxRotation: 0 } },
-            y: { grid: { color: gridColor }, ticks: { color: labelColor, callback: v => 'TZS ' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
+            y: { grid: { color: gridColor }, ticks: { color: labelColor, callback: v => '{{ config('app.currency') }} ' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
         }
     }
 });

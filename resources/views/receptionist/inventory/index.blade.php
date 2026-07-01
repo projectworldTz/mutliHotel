@@ -23,7 +23,7 @@
         [__('Active'),        $summary['active'],      'text-emerald-600 dark:text-emerald-400',   'bg-emerald-50 dark:bg-emerald-900/20'],
         [__('Maintenance'),   $summary['maintenance'], 'text-amber-600 dark:text-amber-400',       'bg-amber-50 dark:bg-amber-900/20'],
         [__('Damaged'),       $summary['damaged'],     'text-rose-600 dark:text-rose-400',         'bg-rose-50 dark:bg-rose-900/20'],
-        [__('Total Value'),   'TZS ' . number_format($summary['total_value'], 0), 'text-purple-600 dark:text-purple-400', 'bg-purple-50 dark:bg-purple-900/20'],
+        [__('Total Value'),   money($summary['total_value']), 'text-purple-600 dark:text-purple-400', 'bg-purple-50 dark:bg-purple-900/20'],
     ] as [$label, $val, $tc, $bg])
     <div class="rounded-2xl {{ $bg }} border border-white/60 dark:border-slate-700 p-4">
         <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ $label }}</p>

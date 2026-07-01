@@ -53,7 +53,7 @@
                         <input type="text" name="address" value="{{ old('address', $hotel->address) }}"
                                class="form-input" required>
                     </div>
-                    <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="grid gap-4 sm:grid-cols-4">
                         <div>
                             <label class="form-label">{{ __('City') }} *</label>
                             <input type="text" name="city" value="{{ old('city', $hotel->city) }}" class="form-input" required>
@@ -66,6 +66,35 @@
                             <label class="form-label">{{ __('Country') }} *</label>
                             <input type="text" name="country" value="{{ old('country', $hotel->country) }}" class="form-input" required>
                         </div>
+                        <div>
+                            <label class="form-label">{{ __('Postal Code') }}</label>
+                            <input type="text" name="postal_code" value="{{ old('postal_code', $hotel->postal_code) }}" class="form-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white mb-5">{{ __('Contact Information') }}</h2>
+                <p class="text-xs text-slate-500 -mt-3 mb-4">{{ __('Shown to guests on your hotel\'s public page.') }}</p>
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <div>
+                        <label class="form-label">{{ __('Phone') }}</label>
+                        <input type="text" name="phone" value="{{ old('phone', $hotel->phone) }}"
+                               class="form-input @error('phone') border-rose-500 @enderror" placeholder="+255 700 000 000">
+                        @error('phone') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="form-label">{{ __('Email') }}</label>
+                        <input type="email" name="email" value="{{ old('email', $hotel->email) }}"
+                               class="form-input @error('email') border-rose-500 @enderror" placeholder="reservations@yourhotel.com">
+                        @error('email') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="form-label">{{ __('Website') }}</label>
+                        <input type="url" name="website" value="{{ old('website', $hotel->website) }}"
+                               class="form-input @error('website') border-rose-500 @enderror" placeholder="https://yourhotel.com">
+                        @error('website') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
                 </div>
             </div>

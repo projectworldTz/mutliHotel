@@ -47,7 +47,7 @@
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="radio" name="discount_type" value="fixed"
-                            x-model="dtype" class="accent-navy"> Fixed amount (TZS off/night)
+                            x-model="dtype" class="accent-navy"> Fixed amount ({{ config('app.currency') }} off/night)
                     </label>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -56,13 +56,13 @@
                         min="0" step="0.01"
                         class="form-input w-full sm:w-36 @error('discount_value') border-rose-400 @enderror"
                         required>
-                    <span class="text-sm text-slate-500" x-text="dtype === 'percentage' ? '% off base rate' : 'TZS off per night'"></span>
+                    <span class="text-sm text-slate-500" x-text="dtype === 'percentage' ? '% off base rate' : '{{ config('app.currency') }} off per night'"></span>
                 </div>
                 @error('discount_value')<p class="form-error">{{ $message }}</p>@enderror
             </div>
 
             <div>
-                <label class="form-label">Credit Limit (TZS) <span class="text-slate-400 text-xs font-normal">optional — max total spend allowed</span></label>
+                <label class="form-label">Credit Limit ({{ config('app.currency') }}) <span class="text-slate-400 text-xs font-normal">optional — max total spend allowed</span></label>
                 <input type="number" name="credit_limit" value="{{ old('credit_limit') }}"
                     min="0" step="1000" class="form-input w-full sm:w-48">
             </div>

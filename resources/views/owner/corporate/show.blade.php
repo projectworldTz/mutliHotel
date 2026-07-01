@@ -80,7 +80,7 @@
                 @if($corporate->credit_limit)
                 <div class="flex justify-between">
                     <dt class="text-slate-500">Credit Limit</dt>
-                    <dd>TZS {{ number_format($corporate->credit_limit, 0) }}</dd>
+                    <dd>{{ money($corporate->credit_limit) }}</dd>
                 </div>
                 @endif
                 @if($corporate->contact_name)
@@ -126,11 +126,11 @@
                     <p class="text-xs text-slate-500">Active Now</p>
                 </div>
                 <div class="col-span-2 text-center rounded-xl bg-navy/5 dark:bg-navy/20 p-3">
-                    <p class="text-xl font-bold text-navy dark:text-navy-light">TZS {{ number_format($stats['total_spend'], 0) }}</p>
+                    <p class="text-xl font-bold text-navy dark:text-navy-light">{{ money($stats['total_spend']) }}</p>
                     <p class="text-xs text-slate-500">Total Spend</p>
                 </div>
                 <div class="col-span-2 text-center rounded-xl bg-slate-50 dark:bg-slate-700 p-3">
-                    <p class="text-lg font-bold text-slate-900 dark:text-white">TZS {{ number_format($stats['avg_booking'], 0) }}</p>
+                    <p class="text-lg font-bold text-slate-900 dark:text-white">{{ money($stats['avg_booking']) }}</p>
                     <p class="text-xs text-slate-500">Avg. Booking Value</p>
                 </div>
             </div>
@@ -179,7 +179,7 @@
                                     {{ ucfirst($booking->status) }}
                                 </span>
                             </td>
-                            <td class="text-right font-semibold text-sm">TZS {{ number_format($booking->grand_total, 0) }}</td>
+                            <td class="text-right font-semibold text-sm">{{ money($booking->grand_total) }}</td>
                         </tr>
                         @endforeach
                     </tbody>

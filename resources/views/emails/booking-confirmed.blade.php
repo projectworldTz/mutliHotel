@@ -112,10 +112,10 @@
                         <div class="room-dates">
                             {{ \Carbon\Carbon::parse($room->check_in)->format('d M') }} –
                             {{ \Carbon\Carbon::parse($room->check_out)->format('d M Y') }}
-                            ({{ $room->nights }} nights @ ${{ number_format($room->nightly_rate, 2) }}/night)
+                            ({{ $room->nights }} nights @ {{ $booking->currency }} {{ number_format($room->nightly_rate, 2) }}/night)
                         </div>
                     </div>
-                    <div class="room-price">${{ number_format($room->sub_total, 2) }}</div>
+                    <div class="room-price">{{ $booking->currency }} {{ number_format($room->sub_total, 2) }}</div>
                 </div>
             </div>
             @endforeach
@@ -127,23 +127,23 @@
         <div class="detail-box">
             <div class="total-row">
                 <span>Subtotal</span>
-                <span>${{ number_format($booking->sub_total, 2) }}</span>
+                <span>{{ $booking->currency }} {{ number_format($booking->sub_total, 2) }}</span>
             </div>
             @if($booking->tax_total > 0)
             <div class="total-row">
                 <span>Tax ({{ number_format($booking->tax_rate, 0) }}%)</span>
-                <span>${{ number_format($booking->tax_total, 2) }}</span>
+                <span>{{ $booking->currency }} {{ number_format($booking->tax_total, 2) }}</span>
             </div>
             @endif
             @if($booking->discount_total > 0)
             <div class="total-row" style="color: #16a34a;">
                 <span>Discount</span>
-                <span>-${{ number_format($booking->discount_total, 2) }}</span>
+                <span>-{{ $booking->currency }} {{ number_format($booking->discount_total, 2) }}</span>
             </div>
             @endif
             <div class="total-row grand">
                 <span>Total</span>
-                <span>${{ number_format($booking->grand_total, 2) }}</span>
+                <span>{{ $booking->currency }} {{ number_format($booking->grand_total, 2) }}</span>
             </div>
         </div>
 

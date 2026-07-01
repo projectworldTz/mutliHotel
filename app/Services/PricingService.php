@@ -92,8 +92,8 @@ class PricingService
     /**
      * Format a decimal as a currency string.
      */
-    public function format(float $amount, string $currency = 'USD'): string
+    public function format(float $amount, ?string $currency = null): string
     {
-        return '$' . number_format($amount, 2);
+        return money($amount, $currency, 2);
     }
 }

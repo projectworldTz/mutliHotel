@@ -19,7 +19,7 @@
             <div><p class="form-label mb-0.5">{{ __('Guest') }}</p><p class="font-medium">{{ $booking->user->name ?? 'N/A' }}</p><p class="text-slate-500">{{ $booking->user->email ?? '' }}</p></div>
             <div><p class="form-label mb-0.5">{{ __('Payment') }}</p><p class="font-medium capitalize">{{ $booking->payment_method ?? 'N/A' }}</p><p class="text-slate-500 capitalize">{{ $booking->payment_status ?? '' }}</p></div>
             <div><p class="form-label mb-0.5">{{ __('Guests') }}</p><p>{{ $booking->guests_adults ?? 1 }} {{ __('adults') }} · {{ $booking->guests_children ?? 0 }} {{ __('children') }}</p></div>
-            <div><p class="form-label mb-0.5">{{ __('Total') }}</p><p class="text-xl font-bold text-navy dark:text-navy-light">TZS {{ number_format($booking->grand_total ?? 0, 0) }}</p></div>
+            <div><p class="form-label mb-0.5">{{ __('Total') }}</p><p class="text-xl font-bold text-navy dark:text-navy-light">{{ money($booking->grand_total ?? 0) }}</p></div>
         </div>
 
         @if($booking->special_requests)

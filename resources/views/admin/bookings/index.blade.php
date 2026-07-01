@@ -43,7 +43,7 @@
                 <td>{{ $b->hotel->name ?? 'N/A' }}</td>
                 <td class="text-sm whitespace-nowrap">{{ \Carbon\Carbon::parse($b->check_in)->format('d M Y') }}</td>
                 <td class="text-sm whitespace-nowrap">{{ \Carbon\Carbon::parse($b->check_out)->format('d M Y') }}</td>
-                <td class="font-semibold">TZS {{ number_format($b->grand_total ?? 0, 0) }}</td>
+                <td class="font-semibold">{{ money($b->grand_total ?? 0) }}</td>
                 <td><span class="badge badge-{{ $b->status }}">{{ ucfirst(str_replace('_',' ',$b->status)) }}</span></td>
                 <td><a href="{{ route('admin.bookings.show', $b) }}" class="btn-ghost btn-sm" onclick="event.stopPropagation()">{{ __('View') }}</a></td>
             </tr>

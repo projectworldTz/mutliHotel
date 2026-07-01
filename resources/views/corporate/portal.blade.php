@@ -128,10 +128,10 @@
                                 </div>
                                 <div class="text-right shrink-0">
                                     <p class="text-xs text-slate-400 line-through">
-                                        TZS {{ number_format($rt->base_price, 0) }}/night
+                                        {{ money($rt->base_price) }}/night
                                     </p>
                                     <p class="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                                        TZS {{ number_format($rt->corporate_price, 0) }}<span class="text-xs font-normal text-slate-400">/night</span>
+                                        {{ money($rt->corporate_price) }}<span class="text-xs font-normal text-slate-400">/night</span>
                                     </p>
                                     <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold">
                                         {{ $corporate->discountLabel() }} applied

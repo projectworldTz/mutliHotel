@@ -206,7 +206,7 @@
 {{-- ── Footer ── --}}
 <footer class="mt-20 bg-navy text-white">
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
             <div>
                 <div class="flex items-center gap-2 text-lg font-bold">
                     <svg class="h-6 w-6 text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -223,6 +223,24 @@
                 <ul class="space-y-2 text-sm text-slate-300">
                     <li><a href="{{ route('hotels.index') }}" class="hover:text-white transition">{{ __('Browse Hotels') }}</a></li>
                     <li><a href="{{ route('blog.index') }}" class="hover:text-white transition">{{ __('Travel Blog') }}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gold">{{ __('Contact') }}</h4>
+                <ul class="space-y-2 text-sm text-slate-300">
+                    @php
+                        $footerPhone = ($tenantMode ?? false) ? $currentHotel?->phone : \App\Models\Setting::get('site_phone');
+                        $footerEmail = ($tenantMode ?? false) ? $currentHotel?->email : \App\Models\Setting::get('site_email');
+                    @endphp
+                    @if($footerPhone)
+                    <li><a href="tel:{{ $footerPhone }}" class="hover:text-white transition">{{ $footerPhone }}</a></li>
+                    @endif
+                    @if($footerEmail)
+                    <li><a href="mailto:{{ $footerEmail }}" class="hover:text-white transition">{{ $footerEmail }}</a></li>
+                    @endif
+                    @if(!$footerPhone && !$footerEmail)
+                    <li class="text-slate-500">{{ __('Not provided yet.') }}</li>
+                    @endif
                 </ul>
             </div>
             <div>

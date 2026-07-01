@@ -49,7 +49,7 @@
                         <option value="">— {{ __('Select room type') }} —</option>
                         @foreach($roomTypes as $rt)
                         <option value="{{ $rt->id }}" {{ old('room_type_id') == $rt->id ? 'selected' : '' }}>
-                            {{ $rt->name }} — TZS {{ number_format($rt->base_price, 0) }}/night (max {{ $rt->max_guests }} guests)
+                            {{ $rt->name }} — {{ money($rt->base_price) }}/night (max {{ $rt->max_guests }} guests)
                         </option>
                         @endforeach
                     </select>

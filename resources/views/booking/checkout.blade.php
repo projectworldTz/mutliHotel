@@ -167,7 +167,7 @@
                             </svg>
                             <p class="text-sm text-amber-800 dark:text-amber-200">
                                 {{ __('You will be charged') }}
-                                <strong class="font-bold">TZS {{ number_format(($cart->sub_total ?? 0) - ($cart->discount ?? 0), 0) }}</strong>
+                                <strong class="font-bold">{{ money(($cart->sub_total ?? 0) - ($cart->discount ?? 0)) }}</strong>
                                 {{ __('via') }} <span x-text="providerLabel"></span>.
                             </p>
                         </div>
@@ -205,7 +205,7 @@
                                 –
                                 {{ \Carbon\Carbon::parse($item->check_out)->format('d M Y') }}
                             </span>
-                            <span class="font-semibold">TZS {{ number_format($item->sub_total ?? 0, 0) }}</span>
+                            <span class="font-semibold">{{ money($item->sub_total ?? 0) }}</span>
                         </div>
                     </div>
                     @endforeach
@@ -213,17 +213,17 @@
                     <div class="mt-3 border-t border-slate-100 dark:border-slate-700 pt-3 space-y-1.5 text-sm">
                         <div class="flex justify-between text-slate-600 dark:text-slate-300">
                             <span>{{ __('Subtotal') }}</span>
-                            <span>TZS {{ number_format($cart->sub_total ?? 0, 0) }}</span>
+                            <span>{{ money($cart->sub_total ?? 0) }}</span>
                         </div>
                         @if(($cart->discount ?? 0) > 0)
                         <div class="flex justify-between text-emerald-600 dark:text-emerald-400">
                             <span>{{ __('Discount') }}</span>
-                            <span>−TZS {{ number_format($cart->discount, 0) }}</span>
+                            <span>−{{ money($cart->discount) }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between font-bold text-base text-slate-900 dark:text-white pt-1 border-t border-slate-100 dark:border-slate-700">
                             <span>{{ __('Total') }}</span>
-                            <span>TZS {{ number_format(($cart->sub_total ?? 0) - ($cart->discount ?? 0), 0) }}</span>
+                            <span>{{ money(($cart->sub_total ?? 0) - ($cart->discount ?? 0)) }}</span>
                         </div>
                     </div>
 

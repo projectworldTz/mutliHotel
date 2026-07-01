@@ -200,7 +200,7 @@ class BookingService
                 'tax_rate'                     => $totals['tax_rate'],
                 'discount_total'               => $totals['discount_total'],
                 'grand_total'                  => $totals['grand_total'],
-                'currency'                     => 'TZS',
+                'currency'                     => config('app.currency'),
                 'special_requests'             => $checkoutData['special_requests'] ?? null,
                 'cancellation_policy_snapshot' => json_encode($this->cancellationService->policySnapshot()),
             ]);

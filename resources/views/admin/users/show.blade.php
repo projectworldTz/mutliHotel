@@ -162,7 +162,7 @@
                         <td>{{ $booking->hotel->name ?? '—' }}</td>
                         <td class="text-xs text-slate-500 whitespace-nowrap">{{ $booking->check_in->format('d M') }} – {{ $booking->check_out->format('d M Y') }}</td>
                         <td><span class="badge badge-{{ $booking->status_badge['color'] }}">{{ $booking->status_badge['label'] }}</span></td>
-                        <td class="font-semibold">TZS {{ number_format($booking->grand_total, 0) }}</td>
+                        <td class="font-semibold">{{ money($booking->grand_total) }}</td>
                     </tr>
                     @endforeach
                 </tbody>

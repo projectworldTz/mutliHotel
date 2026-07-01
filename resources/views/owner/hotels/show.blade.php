@@ -349,7 +349,7 @@
                     {{-- Info --}}
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-slate-900 dark:text-white text-sm">{{ $rt->name }}</p>
-                        <p class="text-xs text-slate-500">{{ $rt->beds_count }}× {{ ucfirst($rt->bed_type) }} · {{ __('Max') }} {{ $rt->max_guests }} {{ __('guests') }} · TZS {{ number_format($rt->base_price, 0) }}/{{ __('night') }}</p>
+                        <p class="text-xs text-slate-500">{{ $rt->beds_count }}× {{ ucfirst($rt->bed_type) }} · {{ __('Max') }} {{ $rt->max_guests }} {{ __('guests') }} · {{ money($rt->base_price) }}/{{ __('night') }}</p>
                     </div>
 
                     {{-- Stats --}}

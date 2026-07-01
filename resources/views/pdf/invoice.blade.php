@@ -228,7 +228,7 @@
     $discountTotal = (float) ($invoice?->discount_total  ?? $booking->discount_total ?? 0);
     $grandTotal    = (float) ($invoice?->grand_total     ?? $booking->grand_total  ?? 0);
     $taxRate       = (float) ($booking->tax_rate ?? 0);
-    $currency      = $booking->currency ?? 'TZS';
+    $currency      = $booking->currency ?? config('app.currency');
 
     $amountPaid = (float) ($payment?->amount ?? ($invoiceStatus === 'paid' ? $grandTotal : 0));
     $balanceDue = max(0, $grandTotal - $amountPaid);

@@ -63,22 +63,22 @@
             @if($approval->isDenied())
             <div class="text-center">
                 <p class="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Total Paid</p>
-                <p class="font-bold text-slate-900 dark:text-white">TZS {{ number_format($approval->total_paid, 0) }}</p>
+                <p class="font-bold text-slate-900 dark:text-white">{{ money($approval->total_paid) }}</p>
                 <p class="text-xs text-rose-400 mt-1 font-medium">No deduction — request denied</p>
             </div>
             @else
             <div class="flex items-center gap-6 text-sm">
                 <div class="text-center">
                     <p class="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Total Paid</p>
-                    <p class="font-bold text-slate-900 dark:text-white">TZS {{ number_format($approval->total_paid, 0) }}</p>
+                    <p class="font-bold text-slate-900 dark:text-white">{{ money($approval->total_paid) }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-xs text-rose-400 uppercase tracking-wide mb-0.5">Deducted (60%)</p>
-                    <p class="font-bold text-rose-600 dark:text-rose-400">TZS {{ number_format($approval->deduction_amount, 0) }}</p>
+                    <p class="font-bold text-rose-600 dark:text-rose-400">{{ money($approval->deduction_amount) }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-xs text-emerald-500 uppercase tracking-wide mb-0.5">Refund (40%)</p>
-                    <p class="font-bold text-emerald-600 dark:text-emerald-400">TZS {{ number_format($approval->refund_amount, 0) }}</p>
+                    <p class="font-bold text-emerald-600 dark:text-emerald-400">{{ money($approval->refund_amount) }}</p>
                 </div>
             </div>
             @endif

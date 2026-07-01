@@ -21,7 +21,7 @@ class AirtelMoneyGateway implements PaymentGatewayInterface
             'method'     => $this->getKey(),
             'status'     => 'pending',
             'amount'     => $booking->grand_total,
-            'currency'   => $booking->currency ?? 'TZS',
+            'currency'   => $booking->currency ?? config('app.currency'),
             'metadata'   => [
                 'phone'        => $phone,
                 'reference'    => $booking->booking_number,

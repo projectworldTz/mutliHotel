@@ -25,7 +25,7 @@
             <h3 class="font-bold text-slate-900 dark:text-white">{{ $rt->name }}</h3>
             <p class="text-xs text-slate-500">{{ $rt->beds_count }}× {{ $rt->bed_type }} · {{ __('Max') }} {{ $rt->max_guests }} {{ __('guests') }} · {{ $item['total'] }} {{ __('rooms') }}</p>
         </div>
-        <p class="text-lg font-bold text-navy dark:text-navy-light">TZS {{ number_format($rt->base_price, 0) }}<span class="text-xs font-normal text-slate-400">/{{ __('night') }}</span></p>
+        <p class="text-lg font-bold text-navy dark:text-navy-light">{{ money($rt->base_price) }}<span class="text-xs font-normal text-slate-400">/{{ __('night') }}</span></p>
     </div>
 
     <div class="p-5">

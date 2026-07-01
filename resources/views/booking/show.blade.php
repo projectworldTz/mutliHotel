@@ -105,7 +105,7 @@
                             <span class="ml-2">({{ $item->nights }} {{ __('nights') }})</span>
                         </div>
                     </div>
-                    <p class="font-bold text-slate-900 dark:text-white">TZS {{ number_format($item->sub_total ?? 0, 0) }}</p>
+                    <p class="font-bold text-slate-900 dark:text-white">{{ money($item->sub_total ?? 0) }}</p>
                 </div>
             </div>
             @endforeach
@@ -115,21 +115,21 @@
         <div class="border-t border-slate-100 dark:border-slate-700 pt-4 space-y-1.5 text-sm mb-5">
             <div class="flex justify-between text-slate-600 dark:text-slate-300">
                 <span>{{ __('Subtotal') }}</span>
-                <span>TZS {{ number_format($booking->sub_total ?? 0, 0) }}</span>
+                <span>{{ money($booking->sub_total ?? 0) }}</span>
             </div>
             @if(($booking->discount_total ?? 0) > 0)
             <div class="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <span>{{ __('Discount') }}</span>
-                <span>−TZS {{ number_format($booking->discount_total, 0) }}</span>
+                <span>−{{ money($booking->discount_total) }}</span>
             </div>
             @endif
             <div class="flex justify-between text-slate-600 dark:text-slate-300">
                 <span>{{ __('Tax') }} ({{ $booking->tax_rate }}%)</span>
-                <span>TZS {{ number_format($booking->tax_total ?? 0, 0) }}</span>
+                <span>{{ money($booking->tax_total ?? 0) }}</span>
             </div>
             <div class="flex justify-between font-bold text-base text-slate-900 dark:text-white pt-1">
                 <span>{{ __('Total') }}</span>
-                <span>TZS {{ number_format($booking->grand_total ?? 0, 0) }}</span>
+                <span>{{ money($booking->grand_total ?? 0) }}</span>
             </div>
         </div>
 

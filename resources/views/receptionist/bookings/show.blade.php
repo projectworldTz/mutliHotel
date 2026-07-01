@@ -64,13 +64,13 @@
         <div class="card p-6">
             <h3 class="font-bold text-slate-900 dark:text-white mb-4">{{ __('Price Breakdown') }}</h3>
             <div class="space-y-2 text-sm">
-                <div class="flex justify-between"><span class="text-slate-500">{{ __('Room') }} ({{ $booking->nights }} {{ __('nights') }} × TZS {{ number_format($booking->base_price, 0) }})</span><span>TZS {{ number_format($booking->subtotal, 0) }}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">{{ __('Room') }} ({{ $booking->nights }} {{ __('nights') }} × {{ money($booking->base_price) }})</span><span>{{ money($booking->subtotal) }}</span></div>
                 @if($booking->discount_amount > 0)
-                <div class="flex justify-between text-emerald-600"><span>{{ __('Discount') }}</span><span>−TZS {{ number_format($booking->discount_amount, 0) }}</span></div>
+                <div class="flex justify-between text-emerald-600"><span>{{ __('Discount') }}</span><span>−{{ money($booking->discount_amount) }}</span></div>
                 @endif
-                <div class="flex justify-between"><span class="text-slate-500">{{ __('Tax') }} ({{ $booking->tax_rate ?? 18 }}%)</span><span>TZS {{ number_format($booking->tax_amount, 0) }}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">{{ __('Tax') }} ({{ $booking->tax_rate ?? 18 }}%)</span><span>{{ money($booking->tax_amount) }}</span></div>
                 <div class="flex justify-between font-bold text-base border-t border-slate-200 dark:border-slate-700 pt-2 mt-1">
-                    <span>{{ __('Total') }}</span><span>TZS {{ number_format($booking->grand_total, 0) }}</span>
+                    <span>{{ __('Total') }}</span><span>{{ money($booking->grand_total) }}</span>
                 </div>
             </div>
         </div>
@@ -127,8 +127,8 @@
                 <div x-show="open" x-cloak class="mt-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-200 dark:border-rose-800 p-4">
                     <p class="text-xs font-semibold text-rose-700 dark:text-rose-300 mb-2 uppercase tracking-wide">⚠ Emergency Cancellation</p>
                     <p class="text-xs text-rose-600 dark:text-rose-400 mb-3">
-                        Guest will receive a <strong>40% refund</strong> (TZS {{ number_format($booking->grand_total * 0.40, 0) }}).
-                        Hotel retains <strong>60%</strong> (TZS {{ number_format($booking->grand_total * 0.60, 0) }}).
+                        Guest will receive a <strong>40% refund</strong> ({{ money($booking->grand_total * 0.40) }}).
+                        Hotel retains <strong>60%</strong> ({{ money($booking->grand_total * 0.60) }}).
                         <br>This requires <strong>owner approval</strong> before it can be executed.
                     </p>
                     <form method="POST" action="{{ route('receptionist.cancellation-approvals.request', $booking) }}">
@@ -153,8 +153,8 @@
             <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800 p-3">
                 <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-300 mb-1">✓ Owner Approved — Ready to Execute</p>
                 <p class="text-xs text-emerald-600 dark:text-emerald-400 mb-2">
-                    Refund: TZS {{ number_format($cancellationApproval->refund_amount, 0) }} (40%) &nbsp;|&nbsp;
-                    Deducted: TZS {{ number_format($cancellationApproval->deduction_amount, 0) }} (60%)
+                    Refund: {{ money($cancellationApproval->refund_amount) }} (40%) &nbsp;|&nbsp;
+                    Deducted: {{ money($cancellationApproval->deduction_amount) }} (60%)
                 </p>
                 <form method="POST" action="{{ route('receptionist.cancellation-approvals.execute', $cancellationApproval) }}"
                       onsubmit="return confirm('Execute emergency cancellation? Booking will be cancelled with 40% refund. This cannot be undone.')">

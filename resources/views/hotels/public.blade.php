@@ -343,7 +343,7 @@
                 @endif
                 {{-- Price badge --}}
                 <div class="absolute top-3 right-3 rounded-xl bg-navy/90 backdrop-blur px-3 py-1.5 text-white">
-                    <span class="text-lg font-extrabold">TZS {{ number_format($rt->base_price, 0) }}</span>
+                    <span class="text-lg font-extrabold">{{ money($rt->base_price) }}</span>
                     <span class="text-xs opacity-80">/{{ __('night') }}</span>
                 </div>
                 @if($rt->view_type)
@@ -418,7 +418,7 @@
                     </template>
                     <svg x-show="!room.image" class="h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                     <div class="absolute top-3 right-3 rounded-xl bg-navy/90 text-white px-3 py-1.5 backdrop-blur">
-                        <span class="text-lg font-extrabold" x-text="'$' + room.nightly_rate"></span>
+                        <span class="text-lg font-extrabold" x-text="'{{ config('app.currency') }} ' + room.nightly_rate"></span>
                         <span class="text-xs opacity-80">/{{ __('night') }}</span>
                     </div>
                 </div>
@@ -428,7 +428,7 @@
                     <div class="mt-3 rounded-xl bg-slate-50 dark:bg-slate-700 p-3 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-500">{{ __('Total for') }} <span x-text="nights"></span> {{ __('night') }}<span x-show="nights !== 1">s</span></p>
-                            <p class="text-xl font-extrabold text-navy dark:text-amber-400" x-text="'$' + (room.nightly_rate * nights).toLocaleString()"></p>
+                            <p class="text-xl font-extrabold text-navy dark:text-amber-400" x-text="'{{ config('app.currency') }} ' + (room.nightly_rate * nights).toLocaleString()"></p>
                         </div>
                         @auth
                         <form method="POST" action="{{ route('booking.cart.store') }}">

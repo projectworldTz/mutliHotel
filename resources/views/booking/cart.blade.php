@@ -46,9 +46,9 @@
                     </div>
                     <div class="text-right shrink-0">
                         <p class="text-xl font-bold text-navy dark:text-navy-light">
-                            TZS {{ number_format($item->sub_total ?? 0, 0) }}
+                            {{ money($item->sub_total ?? 0) }}
                         </p>
-                        <p class="text-xs text-slate-500">TZS {{ number_format($item->roomType->base_price ?? 0, 0) }}/{{ __('night') }}</p>
+                        <p class="text-xs text-slate-500">{{ money($item->roomType->base_price ?? 0) }}/{{ __('night') }}</p>
                         <form method="POST" action="{{ route('booking.cart.destroy', $item) }}" class="mt-2"
                               data-loading data-confirm="{{ __('Remove this item from your cart?') }}">
                             @csrf
@@ -69,17 +69,17 @@
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between text-slate-600 dark:text-slate-300">
                         <span>{{ __('Subtotal') }}</span>
-                        <span>TZS {{ number_format($cart->sub_total ?? 0, 0) }}</span>
+                        <span>{{ money($cart->sub_total ?? 0) }}</span>
                     </div>
                     @if(($cart->discount ?? 0) > 0)
                     <div class="flex justify-between text-emerald-600 dark:text-emerald-400">
                         <span>{{ __('Discount') }}</span>
-                        <span>−TZS {{ number_format($cart->discount, 0) }}</span>
+                        <span>−{{ money($cart->discount) }}</span>
                     </div>
                     @endif
                     <div class="flex justify-between font-bold text-slate-900 dark:text-white text-base pt-2 border-t border-slate-100 dark:border-slate-700">
                         <span>{{ __('Total') }}</span>
-                        <span>TZS {{ number_format(($cart->sub_total ?? 0) - ($cart->discount ?? 0), 0) }}</span>
+                        <span>{{ money(($cart->sub_total ?? 0) - ($cart->discount ?? 0)) }}</span>
                     </div>
                 </div>
                 <a href="{{ route('booking.checkout') }}" class="btn-gold w-full mt-5 text-center block">

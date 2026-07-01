@@ -15,7 +15,7 @@
     @foreach([
         [__('My Hotels'),       $stats['hotels']    ?? 0, 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
         [__('Active Bookings'), $stats['active_bookings'] ?? 0, 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-        [__('Month Revenue'),   'TZS ' . number_format($stats['revenue_month'] ?? 0, 0), 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+        [__('Month Revenue'),   money($stats['revenue_month'] ?? 0), 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
         [__('Total Rooms'),     $stats['rooms']     ?? 0, 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
     ] as [$label, $val, $icon])
     <div class="stat-card">
@@ -71,7 +71,7 @@
                 </div>
                 <div class="text-right">
                     <span class="badge badge-{{ $b->status }}">{{ ucfirst($b->status) }}</span>
-                    <p class="text-xs text-slate-500 mt-0.5">TZS {{ number_format($b->grand_total ?? 0, 0) }}</p>
+                    <p class="text-xs text-slate-500 mt-0.5">{{ money($b->grand_total ?? 0) }}</p>
                 </div>
             </div>
             @endforeach
