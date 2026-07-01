@@ -235,6 +235,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/{hotel}/room-types/{roomType}/images', [OwnerHotelController::class, 'storeRoomTypeImages'])->name('room-types.images.store');
             Route::post('/room-type-images/{image}/set-cover', [OwnerHotelController::class, 'setCoverRoomTypeImage'])->name('room-type-images.set-cover');
             Route::delete('/room-type-images/{image}', [OwnerHotelController::class, 'deleteRoomTypeImage'])->name('room-type-images.destroy');
+            Route::delete('/room-type-images', [OwnerHotelController::class, 'deleteRoomTypeImages'])->name('room-type-images.bulk-destroy');
 
             // Physical rooms
             Route::post('/{hotel}/room-types/{roomType}/rooms', [OwnerHotelController::class, 'storeRoom'])->name('rooms.store');
@@ -243,6 +244,7 @@ Route::middleware('auth')->group(function () {
             Route::post('/{hotel}/images', [OwnerHotelController::class, 'storeImages'])->name('images.store');
             Route::post('/images/{image}/set-cover', [OwnerHotelController::class, 'setCoverImage'])->name('images.set-cover');
             Route::delete('/images/{image}', [OwnerHotelController::class, 'deleteImage'])->name('images.destroy');
+            Route::delete('/images', [OwnerHotelController::class, 'deleteImages'])->name('images.bulk-destroy');
 
             // Payment methods
             Route::post('/{hotel}/payment-methods', [OwnerHotelController::class, 'updatePaymentMethods'])->name('payment-methods.update');

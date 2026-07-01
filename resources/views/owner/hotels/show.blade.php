@@ -126,7 +126,7 @@
         </div>
 
         {{-- Hotel Photos --}}
-        <div class="card p-6">
+        <div class="card p-6" x-data="{ selected: [] }">
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h3 class="font-bold text-slate-900 dark:text-white">Hotel Photos</h3>
@@ -137,14 +137,44 @@
                 </div>
             </div>
 
+            {{-- Bulk delete bar --}}
+            <div x-show="selected.length > 0" x-cloak
+                 class="mb-4 flex items-center justify-between rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-2">
+                <p class="text-xs font-medium text-rose-700 dark:text-rose-300">
+                    <span x-text="selected.length"></span> {{ __('photo(s) selected') }}
+                </p>
+                <div class="flex items-center gap-2">
+                    <button type="button" @click="selected = []" class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                        {{ __('Clear') }}
+                    </button>
+                    <form method="POST" action="{{ route('owner.hotels.images.bulk-destroy') }}"
+                          data-loading data-confirm="{{ __('Delete the selected photos? This cannot be undone.') }}">
+                        @csrf
+                        @method('DELETE')
+                        <template x-for="id in selected" :key="id">
+                            <input type="hidden" name="image_ids[]" :value="id">
+                        </template>
+                        <button type="submit" class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 transition">
+                            {{ __('Delete Selected') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             {{-- Existing images grid --}}
             @if($hotel->images->isNotEmpty())
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-6">
                 @foreach($hotel->images->sortByDesc('is_featured') as $image)
                 <div class="relative group rounded-xl overflow-hidden aspect-square bg-slate-100 dark:bg-slate-800"
-                     x-data="{ confirming: false }">
+                     x-data="{ confirming: false }"
+                     :class="selected.includes({{ $image->id }}) && 'ring-2 ring-rose-500'">
                     <img src="{{ $image->url }}" alt="Hotel photo"
                          class="h-full w-full object-cover transition group-hover:brightness-75">
+
+                    {{-- Select checkbox --}}
+                    <label class="absolute top-1.5 right-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-md bg-white/90 shadow cursor-pointer">
+                        <input type="checkbox" value="{{ $image->id }}" x-model.number="selected" class="h-3.5 w-3.5 rounded text-rose-600 focus:ring-rose-500">
+                    </label>
 
                     {{-- Cover badge --}}
                     @if($image->is_featured)
@@ -300,7 +330,7 @@
                 <p class="p-5 text-sm text-slate-500">{{ __('No room types added yet.') }}</p>
             @else
             @foreach($hotel->roomTypes->load(['images', 'rooms']) as $rt)
-            <div x-data="{ photosOpen: false, roomsOpen: false }" class="border-b border-slate-100 dark:border-slate-700 last:border-0">
+            <div x-data="{ photosOpen: false, roomsOpen: false, selectedPhotos: [] }" class="border-b border-slate-100 dark:border-slate-700 last:border-0">
                 {{-- Room type row --}}
                 <div class="flex items-center gap-3 px-4 py-3">
                     {{-- Cover thumbnail --}}
@@ -411,12 +441,43 @@
                 <div x-show="photosOpen" x-collapse class="px-4 pb-4">
                     <div class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 p-4">
 
+                        {{-- Bulk delete bar --}}
+                        <div x-show="selectedPhotos.length > 0" x-cloak
+                             class="mb-3 flex items-center justify-between rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 px-3 py-1.5">
+                            <p class="text-xs font-medium text-rose-700 dark:text-rose-300">
+                                <span x-text="selectedPhotos.length"></span> {{ __('selected') }}
+                            </p>
+                            <div class="flex items-center gap-2">
+                                <button type="button" @click="selectedPhotos = []" class="text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                                    {{ __('Clear') }}
+                                </button>
+                                <form method="POST" action="{{ route('owner.hotels.room-type-images.bulk-destroy') }}"
+                                      data-loading data-confirm="{{ __('Delete the selected photos? This cannot be undone.') }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <template x-for="id in selectedPhotos" :key="id">
+                                        <input type="hidden" name="image_ids[]" :value="id">
+                                    </template>
+                                    <button type="submit" class="rounded-lg bg-rose-600 px-3 py-1 text-xs font-semibold text-white hover:bg-rose-700 transition">
+                                        {{ __('Delete Selected') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                         {{-- Existing photos --}}
                         @if($rt->images->isNotEmpty())
                         <div class="grid grid-cols-3 gap-2 sm:grid-cols-6 mb-4">
                             @foreach($rt->images->sortByDesc('is_featured') as $img)
-                            <div class="relative group rounded-xl overflow-hidden aspect-square bg-slate-200 dark:bg-slate-700" x-data="{ confirming: false }">
+                            <div class="relative group rounded-xl overflow-hidden aspect-square bg-slate-200 dark:bg-slate-700"
+                                 x-data="{ confirming: false }"
+                                 :class="selectedPhotos.includes({{ $img->id }}) && 'ring-2 ring-rose-500'">
                                 <img src="{{ $img->url }}" alt="" class="h-full w-full object-cover transition group-hover:brightness-75">
+
+                                {{-- Select checkbox --}}
+                                <label class="absolute top-1 right-1 z-10 flex h-4 w-4 items-center justify-center rounded bg-white/90 shadow cursor-pointer">
+                                    <input type="checkbox" value="{{ $img->id }}" x-model.number="selectedPhotos" class="h-3 w-3 rounded text-rose-600 focus:ring-rose-500">
+                                </label>
 
                                 @if($img->is_featured)
                                 <div class="absolute top-1 left-1 rounded-full bg-gold px-1.5 py-0.5 text-[9px] font-bold text-white uppercase shadow">{{ __('Cover') }}</div>

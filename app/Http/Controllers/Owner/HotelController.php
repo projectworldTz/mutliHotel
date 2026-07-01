@@ -194,6 +194,23 @@ class HotelController extends Controller
         return back()->with('success', 'Photo deleted.');
     }
 
+    public function deleteImages(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'image_ids'   => ['required', 'array', 'min:1'],
+            'image_ids.*' => ['integer', 'exists:hotel_images,id'],
+        ]);
+
+        $images = HotelImage::whereIn('id', $data['image_ids'])->get();
+
+        foreach ($images as $image) {
+            $this->authorizeHotel($image->hotel);
+            $this->hotelService->deleteImage($image);
+        }
+
+        return back()->with('success', $images->count() . ' photo(s) deleted.');
+    }
+
     // ── Room-type image management ────────────────────────────────────────────
 
     public function storeRoomTypeImages(Request $request, Hotel $hotel, RoomType $roomType): RedirectResponse
@@ -244,6 +261,28 @@ class HotelController extends Controller
         $image->delete();
 
         return back()->with('success', 'Photo deleted.');
+    }
+
+    public function deleteRoomTypeImages(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'image_ids'   => ['required', 'array', 'min:1'],
+            'image_ids.*' => ['integer', 'exists:room_images,id'],
+        ]);
+
+        $images = RoomImage::whereIn('id', $data['image_ids'])->get();
+
+        foreach ($images as $image) {
+            $this->authorizeHotel($image->roomType->hotel);
+
+            if (Storage::disk('public')->exists($image->path)) {
+                Storage::disk('public')->delete($image->path);
+            }
+
+            $image->delete();
+        }
+
+        return back()->with('success', $images->count() . ' photo(s) deleted.');
     }
 
     // ── Online booking toggle ─────────────────────────────────────────────────
