@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Reception') — {{ $assignedHotel->name ?? config('app.name') }}</title>
-    <script>if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');</script>
+    <script>if (localStorage.getItem('theme') !== 'light') document.documentElement.classList.add('dark');</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>

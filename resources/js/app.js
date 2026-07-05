@@ -10,7 +10,7 @@ window.Chart = Chart;
 document.addEventListener('alpine:init', () => {
     // Global dark-mode store — persisted in localStorage
     Alpine.store('theme', {
-        dark: localStorage.getItem('theme') === 'dark',
+        dark: localStorage.getItem('theme') !== 'light',
         toggle() {
             this.dark = !this.dark;
             localStorage.setItem('theme', this.dark ? 'dark' : 'light');

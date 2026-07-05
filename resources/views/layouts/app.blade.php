@@ -9,7 +9,7 @@
     <title>@yield('title', config('app.name')) — {{ config('app.name') }}</title>
     {{-- Prevent flash of wrong theme --}}
     <script>
-        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+        if (localStorage.getItem('theme') !== 'light') document.documentElement.classList.add('dark');
     </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
