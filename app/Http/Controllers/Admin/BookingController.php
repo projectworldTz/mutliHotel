@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Hotel;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 
@@ -15,8 +16,9 @@ class BookingController extends Controller
     {
         $filters  = $request->only(['status', 'date_from', 'date_to', 'search', 'hotel_id']);
         $bookings = $this->bookingService->allPaginated($filters);
+        $hotels   = Hotel::orderBy('name')->get(['id', 'name']);
 
-        return view('admin.bookings.index', compact('bookings', 'filters'));
+        return view('admin.bookings.index', compact('bookings', 'filters', 'hotels'));
     }
 
     public function show(Booking $booking)

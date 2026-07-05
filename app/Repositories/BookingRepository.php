@@ -97,6 +97,14 @@ class BookingRepository
             $query->where('hotel_id', $filters['hotel_id']);
         }
 
+        if (! empty($filters['date_from'])) {
+            $query->whereDate('check_in', '>=', $filters['date_from']);
+        }
+
+        if (! empty($filters['date_to'])) {
+            $query->whereDate('check_in', '<=', $filters['date_to']);
+        }
+
         if (! empty($filters['search'])) {
             $term = $filters['search'];
             $query->where(function ($q) use ($term) {

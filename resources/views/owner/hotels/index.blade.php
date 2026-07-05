@@ -3,9 +3,11 @@
 @section('page-title', __('My Hotels'))
 
 @section('content')
+@if(auth()->user()->canAddHotel())
 <div class="mb-5 flex justify-end">
     <a href="{{ route('owner.hotels.create') }}" class="btn-primary">+ {{ __('Add Hotel') }}</a>
 </div>
+@endif
 
 @if($hotels->isEmpty())
     <div class="card flex flex-col items-center justify-center py-20 text-center">
@@ -14,7 +16,9 @@
         </svg>
         <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ __('No hotels listed') }}</h3>
         <p class="mt-1 text-sm text-slate-500">{{ __('Add your first hotel to start accepting bookings.') }}</p>
+        @if(auth()->user()->canAddHotel())
         <a href="{{ route('owner.hotels.create') }}" class="btn-primary mt-5">{{ __('List Your Hotel') }}</a>
+        @endif
     </div>
 @else
 <div class="card table-wrap">

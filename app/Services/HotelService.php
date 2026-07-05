@@ -6,6 +6,7 @@ use App\Models\Hotel;
 use App\Models\HotelImage;
 use App\Models\Room;
 use App\Models\RoomType;
+use App\Models\Setting;
 use App\Models\User;
 use App\Repositories\HotelRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -70,15 +71,18 @@ class HotelService
 
     public function create(array $data, User $owner): Hotel
     {
-        $data['owner_id'] = $owner->id;
-        $data['slug']     = $this->uniqueSlug($data['name']);
-        $data['status']   = 'pending'; // always starts as pending until admin approves
+        $data['owner_id']        = $owner->id;
+        $data['slug']            = $this->uniqueSlug($data['name']);
+        $data['status']          = 'pending'; // always starts as pending until admin approves
+        $data['commission_rate'] = (float) Setting::get('default_commission_rate', 10);
 
         $hotel = Hotel::create($data);
 
         if (! empty($data['amenity_ids'])) {
             $hotel->amenities()->sync($data['amenity_ids']);
         }
+
+        event(new \App\Events\HotelSubmitted($hotel));
 
         return $hotel;
     }

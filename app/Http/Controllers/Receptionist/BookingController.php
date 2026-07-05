@@ -134,7 +134,7 @@ class BookingController extends Controller
             }
         }
 
-        $taxRate  = (float) Setting::get('tax_rate', 18);
+        $taxRate  = (float) Setting::get('booking_tax_rate', 10);
         $subTotal = round($roomType->base_price * $nights, 2);
         $taxTotal = round($subTotal * $taxRate / 100, 2);
         $grandTotal = $subTotal + $taxTotal;

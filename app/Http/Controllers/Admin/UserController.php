@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hotel;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -46,19 +47,24 @@ class UserController extends Controller
                 $q->where('name', 'like', "%{$s}%")
                   ->orWhere('email', 'like', "%{$s}%");
             }))
-            ->when($request->role, fn ($q, $r) => $q->whereHas('roles', fn ($q) => $q->where('slug', $r)))
-            ->with('roles')
+            ->when($request->role, fn ($q, $r) => $q->whereHas('roles', fn ($q) => $q->where('name', $r)))
+            ->when($request->hotel_id, fn ($q, $h) => $q->where(function ($q) use ($h) {
+                $q->whereHas('ownedHotels', fn ($q2) => $q2->where('hotels.id', $h))
+                  ->orWhereHas('staffAssignments', fn ($q2) => $q2->where('hotel_id', $h));
+            }))
+            ->with(['roles', 'ownedHotels:id,name,slug,owner_id', 'staffAssignments' => fn ($q) => $q->where('active', true)->with('hotel:id,name,slug')])
             ->latest()
             ->paginate(20);
 
-        $roles = Role::all();
+        $roles  = Role::all();
+        $hotels = Hotel::orderBy('name')->get(['id', 'name']);
 
-        return view('admin.users.index', compact('users', 'roles'));
+        return view('admin.users.index', compact('users', 'roles', 'hotels'));
     }
 
     public function show(User $user)
     {
-        $user->loadMissing(['roles', 'bookings.hotel', 'ownedHotels']);
+        $user->loadMissing(['roles', 'bookings.hotel', 'ownedHotels', 'staffAssignments.hotel']);
 
         return view('admin.users.show', compact('user'));
     }

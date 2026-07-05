@@ -9,9 +9,18 @@
                class="form-input w-full sm:w-56 py-2 text-sm" placeholder="{{ __('Name or email…') }}">
         <select name="role" class="form-select py-2 text-sm w-auto">
             <option value="">{{ __('All Roles') }}</option>
-            <option value="super_admin" {{ request('role') === 'super_admin' ? 'selected' : '' }}>{{ __('Super Admin') }}</option>
-            <option value="hotel_owner" {{ request('role') === 'hotel_owner' ? 'selected' : '' }}>{{ __('Hotel Owner') }}</option>
-            <option value="customer"    {{ request('role') === 'customer'    ? 'selected' : '' }}>{{ __('Customer') }}</option>
+            <option value="super-admin"  {{ request('role') === 'super-admin'  ? 'selected' : '' }}>{{ __('Super Admin') }}</option>
+            <option value="hotel-owner"  {{ request('role') === 'hotel-owner'  ? 'selected' : '' }}>{{ __('Hotel Owner') }}</option>
+            <option value="receptionist" {{ request('role') === 'receptionist' ? 'selected' : '' }}>{{ __('Receptionist') }}</option>
+            <option value="manager"      {{ request('role') === 'manager'      ? 'selected' : '' }}>{{ __('Manager') }}</option>
+            <option value="cashier"      {{ request('role') === 'cashier'      ? 'selected' : '' }}>{{ __('Cashier') }}</option>
+            <option value="customer"     {{ request('role') === 'customer'     ? 'selected' : '' }}>{{ __('Customer') }}</option>
+        </select>
+        <select name="hotel_id" class="form-select py-2 text-sm w-auto">
+            <option value="">{{ __('All Hotels') }}</option>
+            @foreach($hotels as $h)
+            <option value="{{ $h->id }}" {{ (string) request('hotel_id') === (string) $h->id ? 'selected' : '' }}>{{ $h->name }}</option>
+            @endforeach
         </select>
         <button type="submit" class="btn-primary btn-sm">{{ __('Filter') }}</button>
         <a href="{{ route('admin.users.index') }}" class="btn-ghost btn-sm">{{ __('Reset') }}</a>
@@ -28,6 +37,7 @@
                 <th>{{ __('Name') }}</th>
                 <th>{{ __('Email') }}</th>
                 <th>{{ __('Role') }}</th>
+                <th>{{ __('Hotel') }}</th>
                 <th>{{ __('Status') }}</th>
                 <th>{{ __('Joined') }}</th>
                 <th></th>
@@ -43,6 +53,23 @@
                         <span class="badge badge-pending mr-1">{{ $role->name }}</span>
                     @endforeach
                 </td>
+                <td class="text-sm">
+                    @if($user->ownedHotels->isNotEmpty())
+                        @foreach($user->ownedHotels as $h)
+                            <a href="{{ route('admin.hotels.show', $h) }}" class="text-navy dark:text-amber-400 hover:underline block">{{ $h->name }}</a>
+                        @endforeach
+                    @elseif($user->staffAssignments->isNotEmpty())
+                        @foreach($user->staffAssignments as $assignment)
+                            @if($assignment->hotel)
+                            <a href="{{ route('admin.hotels.show', $assignment->hotel) }}" class="text-navy dark:text-amber-400 hover:underline block">
+                                {{ $assignment->hotel->name }}
+                            </a>
+                            @endif
+                        @endforeach
+                    @else
+                        <span class="text-slate-400">—</span>
+                    @endif
+                </td>
                 <td>
                     @if($user->is_active ?? true)
                         <span class="badge badge-active">{{ __('Active') }}</span>
@@ -54,7 +81,7 @@
                 <td><a href="{{ route('admin.users.show', $user) }}" class="btn-ghost btn-sm">{{ __('Manage') }}</a></td>
             </tr>
             @empty
-            <tr><td colspan="6" class="text-center py-10 text-slate-500">{{ __('No users found.') }}</td></tr>
+            <tr><td colspan="7" class="text-center py-10 text-slate-500">{{ __('No users found.') }}</td></tr>
             @endforelse
         </tbody>
     </table>

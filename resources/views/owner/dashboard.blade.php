@@ -35,7 +35,9 @@
     <div class="card">
         <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
             <h3 class="font-bold text-slate-900 dark:text-white">{{ __('My Hotels') }}</h3>
+            @if(auth()->user()->canAddHotel())
             <a href="{{ route('owner.hotels.create') }}" class="btn-primary btn-sm">+ {{ __('Add Hotel') }}</a>
+            @endif
         </div>
         @if($hotels->isEmpty())
             <p class="p-5 text-sm text-slate-500">{{ __("You haven't listed any hotels yet.") }}</p>

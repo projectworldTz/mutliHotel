@@ -145,6 +145,36 @@
         </div>
         @endif
 
+        {{-- Staff assignments (receptionist / manager / cashier) --}}
+        @if($user->staffAssignments->count())
+        <div class="card overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">Hotel Assignment</h3>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr><th>Hotel</th><th>Position</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach($user->staffAssignments as $assignment)
+                    <tr class="tr-hover">
+                        <td class="font-medium text-slate-900 dark:text-white">{{ $assignment->hotel->name ?? '—' }}</td>
+                        <td class="text-slate-500">{{ ucfirst($assignment->position ?? '—') }}</td>
+                        <td>
+                            <span class="badge {{ $assignment->active ? 'badge-active' : 'badge-suspended' }}">{{ $assignment->active ? 'Active' : 'Inactive' }}</span>
+                        </td>
+                        <td>
+                            @if($assignment->hotel)
+                            <a href="{{ route('admin.hotels.show', $assignment->hotel) }}" class="btn-ghost btn-sm">View Hub</a>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+
         {{-- Recent bookings --}}
         @if($user->bookings->count())
         <div class="card overflow-hidden">

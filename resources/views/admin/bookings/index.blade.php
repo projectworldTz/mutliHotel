@@ -14,8 +14,14 @@
             <option value="{{ $s }}" {{ request('status') === $s ? 'selected' : '' }}>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
             @endforeach
         </select>
-        <input type="date" name="from" value="{{ request('from') }}" class="form-input py-2 text-sm w-auto" placeholder="{{ __('From') }}">
-        <input type="date" name="to" value="{{ request('to') }}" class="form-input py-2 text-sm w-auto" placeholder="{{ __('To') }}">
+        <select name="hotel_id" class="form-select py-2 text-sm w-auto">
+            <option value="">{{ __('All Hotels') }}</option>
+            @foreach($hotels as $h)
+            <option value="{{ $h->id }}" {{ (string) request('hotel_id') === (string) $h->id ? 'selected' : '' }}>{{ $h->name }}</option>
+            @endforeach
+        </select>
+        <input type="date" name="date_from" value="{{ request('date_from') }}" class="form-input py-2 text-sm w-auto" placeholder="{{ __('From') }}">
+        <input type="date" name="date_to" value="{{ request('date_to') }}" class="form-input py-2 text-sm w-auto" placeholder="{{ __('To') }}">
         <button type="submit" class="btn-primary btn-sm">{{ __('Filter') }}</button>
         <a href="{{ route('admin.bookings.index') }}" class="btn-ghost btn-sm">{{ __('Reset') }}</a>
     </form>
@@ -40,7 +46,13 @@
             <tr class="tr-hover" data-href="{{ route('admin.bookings.show', $b) }}">
                 <td class="font-mono text-xs">{{ $b->booking_number }}</td>
                 <td>{{ $b->user->name ?? 'N/A' }}</td>
-                <td>{{ $b->hotel->name ?? 'N/A' }}</td>
+                <td>
+                    @if($b->hotel)
+                        <a href="{{ route('admin.hotels.show', $b->hotel) }}" class="text-navy dark:text-amber-400 hover:underline" onclick="event.stopPropagation()">{{ $b->hotel->name }}</a>
+                    @else
+                        <span class="text-slate-400">N/A</span>
+                    @endif
+                </td>
                 <td class="text-sm whitespace-nowrap">{{ \Carbon\Carbon::parse($b->check_in)->format('d M Y') }}</td>
                 <td class="text-sm whitespace-nowrap">{{ \Carbon\Carbon::parse($b->check_out)->format('d M Y') }}</td>
                 <td class="font-semibold">{{ money($b->grand_total ?? 0) }}</td>

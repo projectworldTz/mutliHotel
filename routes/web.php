@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\ErrorLogController;
 use App\Http\Controllers\Admin\FeatureRequestController as AdminFeatureRequestController;
 use App\Http\Controllers\Admin\HotelFeatureController;
 use App\Http\Controllers\Owner\FeatureRequestController as OwnerFeatureRequestController;
@@ -174,6 +175,14 @@ Route::middleware('auth')->group(function () {
 
         // Audit logs
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+
+        // Error logs
+        Route::prefix('error-logs')->name('error-logs.')->group(function () {
+            Route::get('/', [ErrorLogController::class, 'index'])->name('index');
+            Route::get('/{errorLog}', [ErrorLogController::class, 'show'])->name('show');
+            Route::patch('/{errorLog}', [ErrorLogController::class, 'update'])->name('update');
+            Route::delete('/{errorLog}', [ErrorLogController::class, 'destroy'])->name('destroy');
+        });
 
         // Feature access requests
         Route::prefix('feature-requests')->name('feature-requests.')->group(function () {

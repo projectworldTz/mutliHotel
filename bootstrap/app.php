@@ -26,5 +26,24 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->renderable(function (\Throwable $e, $request) {
+            if (! \App\Models\ErrorLog::isReportable($e)) {
+                return null;
+            }
+
+            $errorLog = \App\Models\ErrorLog::recordFromThrowable($e, $request);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message'   => 'Server Error',
+                    'reference' => $errorLog->code,
+                ], 500);
+            }
+
+            if (! config('app.debug')) {
+                return response()->view('errors.500', ['code' => $errorLog->code], 500);
+            }
+
+            return null;
+        });
     })->create();
