@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Hotel;
+
 class HomeController extends Controller
 {
     public function index()
     {
-        if (app()->bound('current_hotel')) {
-            return redirect()->route('hotels.show', app('current_hotel'));
+        if ($hotel = Hotel::currentForGuest()) {
+            return redirect()->route('hotels.show', $hotel);
         }
 
         return view('home');

@@ -82,11 +82,12 @@ class User extends Authenticatable
         return $this->hasMany(Hotel::class, 'owner_id');
     }
 
-    /** Whether this owner can still register another hotel */
+    /** Whether this owner can still register another hotel (system is single-hotel: nobody can once one exists) */
     public function canAddHotel(): bool
     {
         $limit = (int) ($this->max_hotels ?? 1);
-        return $this->ownedHotels()->count() < $limit;
+        return $this->ownedHotels()->count() < $limit
+            && Hotel::count() === 0;
     }
 
     /** Staff assignments (receptionist scoped to a hotel) */
