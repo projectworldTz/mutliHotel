@@ -14,12 +14,12 @@
 
 @forelse($grid as $item)
 @php $rt = $item['room_type']; $calendar = $item['calendar']; @endphp
-<div class="card mb-5" x-data="availabilityCalendar(
+<div class="card mb-5" x-data='availabilityCalendar(
     @json($calendar),
-    '{{ now()->year }}',
-    '{{ now()->month }}',
-    '{{ route('hotels.room.calendar', [$hotel, $rt, '__YEAR__', '__MONTH__']) }}'
-)">
+    {{ now()->year }},
+    {{ now()->month }},
+    "{{ route('hotels.room.calendar', [$hotel, $rt, '__YEAR__', '__MONTH__']) }}"
+)'>
     <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
         <div>
             <h3 class="font-bold text-slate-900 dark:text-white">{{ $rt->name }}</h3>

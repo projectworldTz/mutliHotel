@@ -3,6 +3,20 @@
 @section('page-title', __('Staff') . ' — ' . $hotel->name)
 
 @section('content')
+
+@if(session('temp_password'))
+<div class="mb-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 p-5">
+    <h3 class="font-bold text-emerald-900 dark:text-emerald-100">{{ __('Staff account created') }}</h3>
+    <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
+        {{ __('Share these sign-in details with the new staff member. This password is shown only once — they can change it after logging in from Account Settings.') }}
+    </p>
+    <div class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 font-mono text-sm">
+        <span class="text-emerald-900 dark:text-emerald-100"><span class="text-emerald-600 dark:text-emerald-400 font-sans">{{ __('Email') }}:</span> {{ session('temp_password_email') }}</span>
+        <span class="text-emerald-900 dark:text-emerald-100"><span class="text-emerald-600 dark:text-emerald-400 font-sans">{{ __('Temporary Password') }}:</span> {{ session('temp_password') }}</span>
+    </div>
+</div>
+@endif
+
 <div class="mb-4 flex items-center gap-2">
     <a href="{{ route('owner.hotels.show', $hotel) }}" class="btn-ghost btn-sm">← {{ $hotel->name }}</a>
     <a href="{{ route('owner.hotels.staff.create', $hotel) }}" class="btn-primary btn-sm ml-auto">+ {{ __('Invite Staff') }}</a>

@@ -44,9 +44,9 @@
         ];
         $c = $colorMap[$kpi['color']];
     @endphp
-    <div class="rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 shadow-sm">
-        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">{{ $kpi['label'] }}</p>
-        <p class="text-2xl font-bold text-slate-900 dark:text-white leading-none">
+    <div class="min-w-0 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-4 shadow-sm">
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2 truncate">{{ $kpi['label'] }}</p>
+        <p class="text-xl lg:text-2xl font-bold text-slate-900 dark:text-white leading-tight break-words">
             {{ $kpi['prefix'] }}{{ $kpi['value'] }}{{ $kpi['suffix'] }}
         </p>
         @if($kpi['change'] !== null)

@@ -21,6 +21,7 @@ use App\Services\HotelService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use App\Services\Payments\AirtelMoneyGateway;
+use App\Services\Payments\DpoPayGateway;
 use App\Services\Payments\HalotelGateway;
 use App\Services\Payments\MixByYasGateway;
 use App\Services\Payments\MpesaGateway;
@@ -63,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(MpesaGateway::class),
                 $app->make(HalotelGateway::class),
                 $app->make(MixByYasGateway::class),
+                $app->make(DpoPayGateway::class),
             );
         });
 

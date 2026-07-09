@@ -62,4 +62,21 @@ return [
         'base_url'       => env('MIX_BY_YAS_BASE_URL', 'https://api.mixbyyas.co.tz'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | DPO Pay (Direct Pay Online) — card payments
+    |--------------------------------------------------------------------------
+    | Obtain a company token from: https://www.dpogroup.com (merchant onboarding)
+    | Sandbox base URL: https://secure1.sandbox.directpay.online
+    | Production base URL: https://secure.3gdirectpay.com
+    | DPO uses an XML API: createToken starts a transaction and returns a
+    | TransactionToken you redirect the customer to; verifyToken is then
+    | called server-side once they return, rather than a pushed webhook.
+    */
+    'dpo_card' => [
+        'company_token' => env('DPO_COMPANY_TOKEN'),
+        'service_type'  => env('DPO_SERVICE_TYPE'), // DPO-assigned numeric service/product code
+        'base_url'      => env('DPO_BASE_URL', 'https://secure.3gdirectpay.com'),
+    ],
+
 ];

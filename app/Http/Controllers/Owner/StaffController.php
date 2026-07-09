@@ -8,7 +8,6 @@ use App\Models\HotelStaff;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 class StaffController extends Controller
@@ -40,13 +39,14 @@ class StaffController extends Controller
         ]);
 
         // Find or create the user — track whether this is a brand-new account
-        $isNewUser = ! User::where('email', $data['email'])->exists();
+        $isNewUser    = ! User::where('email', $data['email'])->exists();
+        $tempPassword = $isNewUser ? Str::password(10, symbols: false) : null;
 
         $user = User::firstOrCreate(
             ['email' => $data['email']],
             [
                 'name'     => $data['name'] ?? $data['email'],
-                'password' => bcrypt(Str::random(32)),
+                'password' => bcrypt($tempPassword ?? Str::random(32)),
             ]
         );
 
@@ -62,17 +62,20 @@ class StaffController extends Controller
             ['position' => $data['position'], 'active' => true]
         );
 
-        // Send password setup email for new accounts so they can log in
+        $redirect = redirect()
+            ->route('owner.hotels.staff.index', $hotel)
+            ->with('success', "{$user->name} added as {$data['position']}.");
+
+        // Hand the owner a one-time temporary password to give the new staff
+        // member directly — they can change it later from Account Settings.
         if ($isNewUser) {
-            Password::sendResetLink(['email' => $user->email]);
-            $message = "{$user->name} added as {$data['position']}. A password setup email has been sent to {$user->email}.";
-        } else {
-            $message = "{$user->name} added as {$data['position']}.";
+            $redirect->with([
+                'temp_password_email' => $user->email,
+                'temp_password'       => $tempPassword,
+            ]);
         }
 
-        return redirect()
-            ->route('owner.hotels.staff.index', $hotel)
-            ->with('success', $message);
+        return $redirect;
     }
 
     public function toggleActive(Hotel $hotel, User $user)

@@ -56,7 +56,10 @@ class Hotel extends Model
     ];
 
     /** All payment method keys supported by the platform. */
-    public const ALL_PAYMENT_METHODS = ['airtel_money', 'mpesa', 'halotel', 'mix_by_yas'];
+    public const ALL_PAYMENT_METHODS = ['airtel_money', 'mpesa', 'halotel', 'mix_by_yas', 'dpo_card'];
+
+    /** Mobile money keys only — used for the manual-payment-numbers fallback (card has no "number" to hand out). */
+    public const MOBILE_MONEY_METHODS = ['airtel_money', 'mpesa', 'halotel', 'mix_by_yas'];
 
     /**
      * Return the enabled payment method keys for this hotel.
@@ -96,6 +99,11 @@ class Hotel extends Model
     public function featuredImage()
     {
         return $this->hasOne(HotelImage::class)->where('is_featured', true)->orderBy('sort_order');
+    }
+
+    public function videos()
+    {
+        return $this->hasMany(HotelVideo::class)->orderBy('sort_order');
     }
 
     public function roomTypes()

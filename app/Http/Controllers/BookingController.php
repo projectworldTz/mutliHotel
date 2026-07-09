@@ -84,11 +84,17 @@ class BookingController extends Controller
         }
 
         $paymentMethod   = $request->validated()['payment_method'];
-        $phoneNumber     = $request->validated()['phone_number'];
+        $phoneNumber     = $request->validated()['phone_number'] ?? null;
 
         $paymentResponse = $this->paymentService->initiate($booking, $paymentMethod, [
             'phone_number' => $phoneNumber,
         ]);
+
+        // Redirect-based gateways (e.g. card via DPO Pay) send the guest to a
+        // hosted payment page instead of showing a phone/PIN pending screen.
+        if (! empty($paymentResponse['redirect_url'])) {
+            return redirect()->away($paymentResponse['redirect_url']);
+        }
 
         return redirect()
             ->route('booking.show', $booking->booking_number)
@@ -159,6 +165,19 @@ class BookingController extends Controller
         return redirect()
             ->route('booking.show', $booking->booking_number)
             ->with(['success' => 'Payment confirmed (development simulation).']);
+    }
+
+    /**
+     * Development-only: stand-in for DPO Pay's hosted card checkout page.
+     * Real DPO integration would redirect here instead once credentials are set;
+     * this endpoint is disabled in production.
+     */
+    public function dpoSimulate(\App\Models\Payment $payment)
+    {
+        abort_unless(app()->environment(['local', 'staging']), 404);
+        abort_if($payment->method !== 'dpo_card', 404);
+
+        return view('booking.dpo-simulate', compact('payment'));
     }
 
     /**

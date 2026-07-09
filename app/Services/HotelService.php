@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Hotel;
 use App\Models\HotelImage;
+use App\Models\HotelVideo;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Setting;
@@ -138,6 +139,40 @@ class HotelService
         }
     }
 
+    // ── Video management ──────────────────────────────────────────────────────
+
+    public function uploadVideo(Hotel $hotel, UploadedFile $file, ?string $title = null): HotelVideo
+    {
+        $path = $file->store("hotels/{$hotel->id}/videos", 'public');
+
+        return $hotel->videos()->create([
+            'title'      => $title,
+            'source'     => 'upload',
+            'path'       => $path,
+            'url'        => Storage::disk('public')->url($path),
+            'sort_order' => $hotel->videos()->max('sort_order') + 1,
+        ]);
+    }
+
+    public function addVideoLink(Hotel $hotel, string $url, ?string $title = null): HotelVideo
+    {
+        return $hotel->videos()->create([
+            'title'      => $title,
+            'source'     => 'embed',
+            'url'        => $url,
+            'sort_order' => $hotel->videos()->max('sort_order') + 1,
+        ]);
+    }
+
+    public function deleteVideo(HotelVideo $video): void
+    {
+        if ($video->isUpload() && $video->path) {
+            Storage::disk('public')->delete($video->path);
+        }
+
+        $video->delete();
+    }
+
     // ── Room type management ──────────────────────────────────────────────────
 
     public function createRoomType(Hotel $hotel, array $data): RoomType
@@ -165,6 +200,18 @@ class HotelService
         return $roomType->fresh();
     }
 
+    /** @throws \RuntimeException when the room type has existing bookings */
+    public function deleteRoomType(RoomType $roomType): void
+    {
+        if ($roomType->bookingRooms()->exists()) {
+            throw new \RuntimeException(
+                'This room type has existing bookings and cannot be deleted. Mark it inactive instead.'
+            );
+        }
+
+        $roomType->delete();
+    }
+
     // ── Room management ───────────────────────────────────────────────────────
 
     public function createRoom(Hotel $hotel, RoomType $roomType, array $data): Room
@@ -176,6 +223,25 @@ class HotelService
             'floor'        => $data['floor'] ?? null,
             'status'       => $data['status'] ?? 'available',
         ]);
+    }
+
+    public function updateRoom(Room $room, array $data): Room
+    {
+        $room->update($data);
+
+        return $room->fresh();
+    }
+
+    /** @throws \RuntimeException when the room has existing bookings */
+    public function deleteRoom(Room $room): void
+    {
+        if ($room->bookingRooms()->exists()) {
+            throw new \RuntimeException(
+                'This room has existing bookings and cannot be deleted. Mark it out of service instead.'
+            );
+        }
+
+        $room->delete();
     }
 
     // ── Admin actions ─────────────────────────────────────────────────────────

@@ -4,33 +4,13 @@
 
 @section('content')
 <div class="mb-4 flex items-center gap-2">
-    <a href="{{ route('owner.hotels.index') }}" class="btn-ghost btn-sm">{{ __('← My Hotels') }}</a>
-    <a href="{{ route('owner.hotels.staff.index', $hotel) }}" class="btn-ghost btn-sm ml-auto">{{ __('Staff') }}</a>
+    <a href="{{ route('owner.dashboard') }}" class="btn-ghost btn-sm">{{ __('← Dashboard') }}</a>
     @if($hotel->hasFeature('housekeeping'))
-    <a href="{{ route('owner.housekeeping.index', $hotel) }}" class="btn-ghost btn-sm">🧹 {{ __('Housekeeping') }}</a>
+    <a href="{{ route('owner.housekeeping.index', $hotel) }}" class="btn-ghost btn-sm ml-auto">🧹 {{ __('Housekeeping') }}</a>
     @endif
-    @if($hotel->hasFeature('advanced_analytics'))
-    <a href="{{ route('owner.analytics.index', $hotel) }}" class="btn-ghost btn-sm">📊 {{ __('Analytics') }}</a>
-    @endif
-    @php $pendingCancellations = \App\Models\CancellationApproval::forHotel($hotel->id)->pending()->count(); @endphp
-    <a href="{{ route('owner.cancellation-approvals.index', $hotel) }}"
-       class="relative btn-ghost btn-sm {{ $pendingCancellations ? 'text-amber-600 dark:text-amber-400' : '' }}">
-        ⚠ {{ __('Cancellations') }}
-        @if($pendingCancellations)
-        <span class="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">{{ $pendingCancellations }}</span>
-        @endif
-    </a>
     @if($hotel->hasFeature('corporate_portal'))
-    <a href="{{ route('owner.hotels.corporate.index', $hotel) }}" class="btn-ghost btn-sm">🏢 {{ __('Corporate') }}</a>
+    <a href="{{ route('owner.hotels.corporate.index', $hotel) }}" class="btn-ghost btn-sm {{ $hotel->hasFeature('housekeeping') ? '' : 'ml-auto' }}">🏢 {{ __('Corporate') }}</a>
     @endif
-    @php $pendingFeatureReqs = \App\Models\FeatureRequest::forHotel($hotel->id)->pending()->count(); @endphp
-    <a href="{{ route('owner.hotels.features.index', $hotel) }}"
-       class="relative btn-ghost btn-sm text-amber-600 dark:text-amber-400">
-        ⭐ {{ __('Premium Features') }}
-        @if($pendingFeatureReqs > 0)
-        <span class="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">{{ $pendingFeatureReqs }}</span>
-        @endif
-    </a>
     <a href="{{ route('owner.hotels.edit', $hotel) }}" class="btn-outline btn-sm">{{ __('Edit Hotel') }}</a>
 </div>
 
@@ -69,6 +49,11 @@
                     </form>
                 </div>
             </div>
+            @unless($hotel->online_booking_enabled)
+            <div class="mt-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+                {{ __('Online Booking is OFF — guests cannot book at all right now, even with Manual Payment enabled below. Turn Online Booking ON to accept bookings; use Manual Payment only to control how they pay.') }}
+            </div>
+            @endunless
             @if($hotel->description)
                 <p class="text-sm text-slate-600 dark:text-slate-300">{{ $hotel->description }}</p>
             @endif
@@ -82,6 +67,9 @@
                 'halotel'      => ['label' => 'Halotel',      'color' => 'bg-orange-500',  'abbr' => 'HL'],
                 'mix_by_yas'   => ['label' => 'Mix by Yas',   'color' => 'bg-blue-600',    'abbr' => 'MX'],
             ];
+            $toggleMethods = $allMethods + [
+                'dpo_card' => ['label' => 'Card Payment (DPO Pay)', 'color' => 'bg-purple-600', 'abbr' => 'CARD'],
+            ];
             $enabled = $hotel->enabledPaymentMethods();
         @endphp
         <div class="card p-6">
@@ -89,7 +77,7 @@
                 <div>
                     <h3 class="font-bold text-slate-900 dark:text-white">{{ __('Payment Methods') }}</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {{ __('Choose which mobile money providers guests can use to pay.') }}
+                        {{ __('Choose which mobile money providers and card payments guests can use to pay.') }}
                     </p>
                 </div>
             </div>
@@ -97,7 +85,7 @@
             <form method="POST" action="{{ route('owner.hotels.payment-methods.update', $hotel) }}">
                 @csrf
                 <div class="grid gap-3 sm:grid-cols-2">
-                    @foreach($allMethods as $key => $method)
+                    @foreach($toggleMethods as $key => $method)
                     @php $isEnabled = in_array($key, $enabled); @endphp
                     <label class="flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3.5 transition-all
                                   {{ $isEnabled
@@ -116,7 +104,7 @@
 
                 <div class="mt-4 flex items-center justify-between">
                     <p class="text-xs text-slate-500 dark:text-slate-400">
-                        {{ count($enabled) }} of {{ count($allMethods) }} {{ __('methods enabled') }}
+                        {{ count($enabled) }} of {{ count($toggleMethods) }} {{ __('methods enabled') }}
                     </p>
                     <button type="submit" class="btn-outline btn-sm">
                         {{ __('Save Payment Methods') }}
@@ -132,6 +120,7 @@
                     <h3 class="font-bold text-slate-900 dark:text-white">{{ __('Manual Payment Fallback') }}</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {{ __('If online payment is unavailable, guests are shown these numbers and asked to contact you to confirm their booking.') }}
+                        {{ __('Requires Online Booking (above) to stay ON — this only changes how guests pay, not whether they can book.') }}
                     </p>
                 </div>
             </div>
@@ -377,12 +366,143 @@
             </div>
         </div>
 
+        {{-- Promo Videos --}}
+        <div class="card p-6" x-data="{ mode: 'link' }">
+            <div class="mb-5">
+                <h3 class="font-bold text-slate-900 dark:text-white">{{ __('Promo Videos') }}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    {{ __('Short video ads guests see on your hotel page — paste a YouTube/Vimeo link or upload a clip directly.') }}
+                </p>
+            </div>
+
+            @error('video')     <p class="mb-3 form-error">{{ $message }}</p> @enderror
+            @error('video_url') <p class="mb-3 form-error">{{ $message }}</p> @enderror
+
+            {{-- Existing videos --}}
+            @if($hotel->videos->isNotEmpty())
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
+                @foreach($hotel->videos as $video)
+                <div class="relative rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                     x-data="{ confirming: false }">
+                    <div class="aspect-video">
+                        @if($video->isUpload())
+                        <video src="{{ $video->url }}" controls class="h-full w-full object-cover"></video>
+                        @else
+                        <iframe src="{{ $video->embed_url }}" class="h-full w-full" allowfullscreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                        @endif
+                    </div>
+                    <div class="flex items-center justify-between gap-2 px-3 py-2">
+                        <p class="text-sm text-slate-700 dark:text-slate-300 truncate">{{ $video->title ?: __('Untitled video') }}</p>
+
+                        <button type="button" @click="confirming = true"
+                                class="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/20 transition"
+                                title="{{ __('Delete video') }}">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div x-show="confirming" x-cloak
+                         class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/80 p-3">
+                        <p class="text-xs text-white text-center font-medium">{{ __('Delete this video?') }}</p>
+                        <div class="flex gap-2">
+                            <button type="button" @click="confirming = false"
+                                    class="rounded-lg bg-white/20 px-3 py-1.5 text-xs text-white hover:bg-white/30 transition">
+                                {{ __('Cancel') }}
+                            </button>
+                            <form method="POST" action="{{ route('owner.hotels.videos.destroy', $video) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs text-white font-semibold hover:bg-rose-700 transition">
+                                    {{ __('Delete') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <p class="text-sm text-slate-400 dark:text-slate-500 mb-5 italic">{{ __('No videos added yet.') }}</p>
+            @endif
+
+            {{-- Add video form --}}
+            <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4 bg-slate-50/50 dark:bg-slate-800/30">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">{{ __('Add a new video') }}</p>
+
+                {{-- Mode toggle --}}
+                <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-600 p-0.5 text-xs font-medium mb-4">
+                    <button type="button" @click="mode = 'link'"
+                            :class="mode === 'link' ? 'bg-navy text-white' : 'text-slate-500 dark:text-slate-300'"
+                            class="rounded-md px-3 py-1.5 transition">{{ __('Paste Link') }}</button>
+                    <button type="button" @click="mode = 'upload'"
+                            :class="mode === 'upload' ? 'bg-navy text-white' : 'text-slate-500 dark:text-slate-300'"
+                            class="rounded-md px-3 py-1.5 transition">{{ __('Upload File') }}</button>
+                </div>
+
+                <form method="POST" action="{{ route('owner.hotels.videos.store', $hotel) }}"
+                      enctype="multipart/form-data" class="space-y-3"
+                      x-data="{ fileName: '', isDragging: false }">
+                    @csrf
+
+                    <input type="text" name="title" placeholder="{{ __('Title (optional)') }}" maxlength="150"
+                           class="form-input w-full text-sm">
+
+                    {{-- Link mode --}}
+                    <div x-show="mode === 'link'">
+                        <input type="url" name="video_url" placeholder="{{ __('https://youtube.com/watch?v=...') }}"
+                               class="form-input w-full text-sm">
+                        <p class="mt-1 text-xs text-slate-400">{{ __('YouTube or Vimeo link.') }}</p>
+                    </div>
+
+                    {{-- Upload mode — big, obvious drop zone (matches Hotel Photos uploader) --}}
+                    <div x-show="mode === 'upload'" x-cloak>
+                        <label for="upload-video"
+                               class="relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed cursor-pointer transition-colors
+                                      border-slate-300 dark:border-slate-600
+                                      hover:border-navy dark:hover:border-navy-light
+                                      hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                               :class="isDragging ? 'border-navy bg-slate-50 dark:border-navy-light dark:bg-slate-800/50' : ''"
+                               @dragover.prevent="isDragging = true"
+                               @dragleave.prevent="isDragging = false"
+                               @drop.prevent="isDragging = false; $refs.videoInput.files = $event.dataTransfer.files; fileName = $refs.videoInput.files[0]?.name ?? ''"
+                               style="min-height: 8rem; padding: 1.5rem;">
+                            <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/>
+                            </svg>
+                            <p class="text-sm text-slate-600 dark:text-slate-300 text-center" x-show="!fileName">
+                                {{ __('Drag & drop a video, or') }} <span class="text-navy dark:text-navy-light underline font-medium">{{ __('click to browse') }}</span>
+                            </p>
+                            <p class="text-sm font-medium text-navy dark:text-navy-light text-center" x-show="fileName" x-text="fileName"></p>
+                            <p class="text-xs text-slate-400">{{ __('MP4, MOV, WebM or AVI · Max 50 MB') }}</p>
+                            <input type="file" id="upload-video" name="video"
+                                   accept="video/mp4,video/quicktime,video/webm,video/x-msvideo"
+                                   class="sr-only"
+                                   x-ref="videoInput"
+                                   @change="fileName = $refs.videoInput.files[0]?.name ?? ''">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary btn-sm">{{ __('Add Video') }}</button>
+                </form>
+            </div>
+        </div>
+
         {{-- Room types --}}
         <div class="card">
             <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
                 <h3 class="font-bold text-slate-900 dark:text-white">{{ __('Room Types') }}</h3>
                 <a href="{{ route('owner.hotels.room-types.create', $hotel) }}" class="btn-primary btn-sm">+ {{ __('Add Room Type') }}</a>
             </div>
+            @error('room_type')
+            <p class="px-4 pt-3 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p>
+            @enderror
+            @error('room')
+            <p class="px-4 pt-3 text-sm text-rose-600 dark:text-rose-400">{{ $message }}</p>
+            @enderror
             @if($hotel->roomTypes->isEmpty())
                 <p class="p-5 text-sm text-slate-500">{{ __('No room types added yet.') }}</p>
             @else
@@ -441,6 +561,27 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
+
+                    {{-- Edit / Delete room type --}}
+                    <a href="{{ route('owner.hotels.room-types.edit', [$hotel, $rt]) }}"
+                       class="rounded-lg border border-slate-200 dark:border-slate-600 p-1.5 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                       title="{{ __('Edit room type') }}">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                    </a>
+                    <form method="POST" action="{{ route('owner.hotels.room-types.destroy', [$hotel, $rt]) }}"
+                          data-loading data-confirm="{{ __('Delete this room type? This cannot be undone.') }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="rounded-lg border border-slate-200 dark:border-slate-600 p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition"
+                                title="{{ __('Delete room type') }}">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </form>
                 </div>
 
                 {{-- Expandable rooms panel --}}
@@ -460,10 +601,49 @@
                                     default          => 'bg-slate-100 text-slate-500',
                                 };
                             @endphp
-                            <span class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium {{ $statusColor }}">
-                                {{ __('Room') }} {{ $room->room_number }}
-                                @if($room->floor)<span class="opacity-60">· {{ __('Floor') }} {{ $room->floor }}</span>@endif
-                            </span>
+                            <div x-data="{ editing: false }">
+                                {{-- Display badge --}}
+                                <div x-show="!editing" class="inline-flex items-center gap-1 rounded-lg {{ $statusColor }} pl-2.5 pr-1 py-1 text-xs font-medium">
+                                    <span>
+                                        {{ __('Room') }} {{ $room->room_number }}
+                                        @if($room->floor)<span class="opacity-60">· {{ __('Floor') }} {{ $room->floor }}</span>@endif
+                                    </span>
+                                    <button type="button" @click="editing = true" class="rounded p-0.5 hover:bg-black/10 transition" title="{{ __('Edit room') }}">
+                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </button>
+                                    <form method="POST" action="{{ route('owner.hotels.rooms.destroy', [$hotel, $rt, $room]) }}"
+                                          data-loading data-confirm="{{ __('Delete Room :number?', ['number' => $room->room_number]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="rounded p-0.5 hover:bg-black/10 transition" title="{{ __('Delete room') }}">
+                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                {{-- Inline edit form --}}
+                                <form x-show="editing" x-cloak method="POST"
+                                      action="{{ route('owner.hotels.rooms.update', [$hotel, $rt, $room]) }}"
+                                      class="flex flex-wrap items-end gap-1.5 rounded-lg border border-slate-200 dark:border-slate-600 p-2">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="text" name="room_number" value="{{ $room->room_number }}" required maxlength="20"
+                                           class="w-20 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-2 py-1 text-xs">
+                                    <input type="number" name="floor" value="{{ $room->floor }}" placeholder="{{ __('Floor') }}"
+                                           class="w-16 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-2 py-1 text-xs">
+                                    <select name="status" class="rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-900 px-2 py-1 text-xs">
+                                        <option value="available" {{ $room->status === 'available' ? 'selected' : '' }}>{{ __('Available') }}</option>
+                                        <option value="maintenance" {{ $room->status === 'maintenance' ? 'selected' : '' }}>{{ __('Maintenance') }}</option>
+                                        <option value="out_of_service" {{ $room->status === 'out_of_service' ? 'selected' : '' }}>{{ __('Out of Service') }}</option>
+                                    </select>
+                                    <button type="submit" class="btn-primary btn-sm text-xs">{{ __('Save') }}</button>
+                                    <button type="button" @click="editing = false" class="btn-ghost btn-sm text-xs">{{ __('Cancel') }}</button>
+                                </form>
+                            </div>
                             @endforeach
                         </div>
                         @endif

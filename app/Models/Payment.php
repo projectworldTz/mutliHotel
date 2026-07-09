@@ -74,6 +74,7 @@ class Payment extends Model
             'mpesa'        => 'M-Pesa',
             'halotel'      => 'Halotel',
             'mix_by_yas'   => 'Mix by Yas',
+            'dpo_card'     => 'Card Payment (DPO Pay)',
             default        => ucfirst(str_replace('_', ' ', $this->method)),
         };
     }

@@ -8,6 +8,8 @@ use App\Models\Amenity;
 use App\Models\Hotel;
 use App\Models\HotelCategory;
 use App\Models\HotelImage;
+use App\Models\HotelVideo;
+use App\Models\Room;
 use App\Models\RoomImage;
 use App\Models\RoomType;
 use Illuminate\Support\Facades\Storage;
@@ -62,7 +64,7 @@ class HotelController extends Controller
     {
         $this->authorizeHotel($hotel);
 
-        $hotel->loadMissing(['images', 'amenities', 'roomTypes.images', 'roomTypes.amenities']);
+        $hotel->loadMissing(['images', 'videos', 'amenities', 'roomTypes.images', 'roomTypes.amenities']);
         $stats = $this->hotelService->stats();
 
         return view('owner.hotels.show', compact('hotel'));
@@ -153,6 +155,84 @@ class HotelController extends Controller
         $this->hotelService->createRoom($hotel, $roomType, $data);
 
         return back()->with('success', "Room {$data['room_number']} created.");
+    }
+
+    public function editRoomType(Hotel $hotel, RoomType $roomType)
+    {
+        $this->authorizeHotel($hotel);
+        abort_if($roomType->hotel_id !== $hotel->id, 404);
+
+        $amenities = Amenity::orderBy('category')->orderBy('name')->get();
+
+        return view('owner.hotels.room-type-edit', compact('hotel', 'roomType', 'amenities'));
+    }
+
+    public function updateRoomType(Request $request, Hotel $hotel, RoomType $roomType)
+    {
+        $this->authorizeHotel($hotel);
+        abort_if($roomType->hotel_id !== $hotel->id, 404);
+
+        $data = $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'base_price'  => 'required|numeric|min:0',
+            'max_guests'  => 'required|integer|min:1|max:20',
+            'bed_type'    => 'required|string|max:50',
+            'beds_count'  => 'required|integer|min:1',
+            'size_sqm'    => 'nullable|numeric|min:0',
+            'view_type'   => 'nullable|string|max:100',
+            'smoking'     => 'boolean',
+            'amenity_ids' => 'nullable|array',
+            'amenity_ids.*' => 'exists:amenities,id',
+        ]);
+
+        $this->hotelService->updateRoomType($roomType, $data);
+
+        return redirect()->route('owner.hotels.show', $hotel)->with('success', 'Room type updated successfully.');
+    }
+
+    public function destroyRoomType(Hotel $hotel, RoomType $roomType)
+    {
+        $this->authorizeHotel($hotel);
+        abort_if($roomType->hotel_id !== $hotel->id, 404);
+
+        try {
+            $this->hotelService->deleteRoomType($roomType);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['room_type' => $e->getMessage()]);
+        }
+
+        return back()->with('success', 'Room type deleted.');
+    }
+
+    public function updateRoom(Request $request, Hotel $hotel, RoomType $roomType, Room $room)
+    {
+        $this->authorizeHotel($hotel);
+        abort_if($roomType->hotel_id !== $hotel->id || $room->room_type_id !== $roomType->id, 404);
+
+        $data = $request->validate([
+            'room_number' => 'required|string|max:20',
+            'floor'       => 'nullable|integer',
+            'status'      => 'in:available,maintenance,out_of_service',
+        ]);
+
+        $this->hotelService->updateRoom($room, $data);
+
+        return back()->with('success', "Room {$data['room_number']} updated.");
+    }
+
+    public function destroyRoom(Hotel $hotel, RoomType $roomType, Room $room)
+    {
+        $this->authorizeHotel($hotel);
+        abort_if($roomType->hotel_id !== $hotel->id || $room->room_type_id !== $roomType->id, 404);
+
+        try {
+            $this->hotelService->deleteRoom($room);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['room' => $e->getMessage()]);
+        }
+
+        return back()->with('success', "Room {$room->room_number} deleted.");
     }
 
     // ── Image management ──────────────────────────────────────────────────────
@@ -285,6 +365,37 @@ class HotelController extends Controller
         return back()->with('success', $images->count() . ' photo(s) deleted.');
     }
 
+    // ── Video management ──────────────────────────────────────────────────────
+
+    public function storeVideo(Request $request, Hotel $hotel): RedirectResponse
+    {
+        $this->authorizeHotel($hotel);
+
+        $data = $request->validate([
+            'title'     => ['nullable', 'string', 'max:150'],
+            'video'     => ['required_without:video_url', 'nullable', 'file', 'mimes:mp4,mov,webm,avi', 'max:51200'],
+            'video_url' => ['required_without:video', 'nullable', 'url', 'max:500'],
+        ]);
+
+        if ($request->hasFile('video')) {
+            $this->hotelService->uploadVideo($hotel, $request->file('video'), $data['title'] ?? null);
+        } else {
+            $this->hotelService->addVideoLink($hotel, $data['video_url'], $data['title'] ?? null);
+        }
+
+        return back()->with('success', 'Video added successfully.');
+    }
+
+    public function deleteVideo(HotelVideo $video): RedirectResponse
+    {
+        $hotel = $video->hotel;
+        $this->authorizeHotel($hotel);
+
+        $this->hotelService->deleteVideo($video);
+
+        return back()->with('success', 'Video deleted.');
+    }
+
     // ── Online booking toggle ─────────────────────────────────────────────────
 
     public function toggleOnlineBooking(Hotel $hotel): RedirectResponse
@@ -306,7 +417,7 @@ class HotelController extends Controller
 
         $data = $request->validate([
             'payment_methods'   => ['required', 'array', 'min:1'],
-            'payment_methods.*' => ['in:airtel_money,mpesa,halotel,mix_by_yas'],
+            'payment_methods.*' => ['in:' . implode(',', Hotel::ALL_PAYMENT_METHODS)],
         ], [
             'payment_methods.min' => 'At least one payment method must be enabled.',
         ]);

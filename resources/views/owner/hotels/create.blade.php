@@ -168,6 +168,28 @@
                                    class="form-input @error('country') border-rose-500 @enderror" required>
                         </div>
                     </div>
+                    <div>
+                        <label class="form-label">{{ __('Map Coordinates') }}</label>
+                        <p class="text-xs text-slate-500 mb-2">
+                            {{ __('Used to place the pin on your public page\'s map. Find these by right-clicking your location on') }}
+                            <a href="https://www.google.com/maps" target="_blank" rel="noopener" class="text-navy dark:text-amber-400 underline">Google Maps</a>
+                            {{ __('and copying the coordinates shown.') }}
+                        </p>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <input type="number" step="any" min="-90" max="90" name="latitude"
+                                       value="{{ old('latitude') }}" placeholder="{{ __('Latitude, e.g. -6.823959') }}"
+                                       class="form-input @error('latitude') border-rose-500 @enderror">
+                                @error('latitude') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <input type="number" step="any" min="-180" max="180" name="longitude"
+                                       value="{{ old('longitude') }}" placeholder="{{ __('Longitude, e.g. 39.133622') }}"
+                                       class="form-input @error('longitude') border-rose-500 @enderror">
+                                @error('longitude') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

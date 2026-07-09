@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Services\Payments\AirtelMoneyGateway;
+use App\Services\Payments\DpoPayGateway;
 use App\Services\Payments\HalotelGateway;
 use App\Services\Payments\MixByYasGateway;
 use App\Services\Payments\MpesaGateway;
@@ -20,12 +21,14 @@ class PaymentService
         MpesaGateway       $mpesa,
         HalotelGateway     $halotel,
         MixByYasGateway    $mixByYas,
+        DpoPayGateway      $dpoCard,
     ) {
         $this->gateways = [
             $airtelMoney->getKey() => $airtelMoney,
             $mpesa->getKey()       => $mpesa,
             $halotel->getKey()     => $halotel,
             $mixByYas->getKey()    => $mixByYas,
+            $dpoCard->getKey()     => $dpoCard,
         ];
     }
 

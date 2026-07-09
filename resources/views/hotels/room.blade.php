@@ -115,12 +115,12 @@
                 <h2 class="section-title mb-1">{{ __('Availability') }}</h2>
                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">{{ __('Calendar shows availability for the current month.') }}</p>
 
-                <div x-data="availabilityCalendar(
+                <div x-data='availabilityCalendar(
                     @json($calendar),
-                    '{{ now()->year }}',
-                    '{{ now()->month }}',
-                    '{{ route('hotels.room.calendar', [$hotel, $roomType, '__YEAR__', '__MONTH__']) }}'
-                )">
+                    {{ now()->year }},
+                    {{ now()->month }},
+                    "{{ route('hotels.room.calendar', [$hotel, $roomType, '__YEAR__', '__MONTH__']) }}"
+                )'>
                     {{-- Nav --}}
                     <div class="flex items-center justify-between mb-3">
                         <button @click="prevMonth()" :disabled="isPrevDisabled()"
@@ -167,7 +167,17 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400">{{ __('Part of') }}</p>
                     <a href="{{ route('hotels.show', $hotel) }}"
                        class="font-semibold text-navy dark:text-navy-light hover:underline">{{ $hotel->name }}</a>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ $hotel->city }}, {{ $hotel->country }}</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {{ $hotel->city }}, {{ $hotel->country }}
+                        @if($hotel->review_count)
+                        <span class="mx-1">·</span>
+                        <span class="inline-flex items-center gap-0.5 text-amber-500">
+                            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            <span class="font-medium">{{ number_format($hotel->average_rating, 1) }}</span>
+                        </span>
+                        <span class="text-slate-400">({{ $hotel->review_count }})</span>
+                        @endif
+                    </p>
                 </div>
                 <a href="{{ route('hotels.show', $hotel) }}" class="btn-ghost btn-sm shrink-0">{{ __('View Hotel') }} →</a>
             </div>
@@ -186,6 +196,15 @@
                     <p class="text-2xl font-bold text-navy dark:text-navy-light mt-0.5">
                         {{ money($roomType->base_price) }}<span class="text-sm font-normal text-slate-500"> / {{ __('night') }}</span>
                     </p>
+                    @if($hotel->review_count)
+                    <a href="{{ route('hotels.show', $hotel) }}#sec-reviews"
+                       class="mt-2 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-navy dark:hover:text-amber-400 transition w-fit">
+                        <svg class="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <strong class="text-slate-900 dark:text-white">{{ number_format($hotel->average_rating, 1) }}</strong>
+                        <span class="text-slate-400">·</span>
+                        <span class="underline underline-offset-2">{{ $hotel->review_count }} {{ Str::plural(__('review'), $hotel->review_count) }}</span>
+                    </a>
+                    @endif
                 </div>
 
                 <div class="space-y-3">

@@ -57,10 +57,11 @@
 
                     @php
                         $methodMeta = [
-                            'airtel_money' => ['label' => 'Airtel Money', 'color' => 'bg-red-500',     'text' => 'text-red-600 dark:text-red-400',           'abbr' => 'AM'],
-                            'mpesa'        => ['label' => 'M-Pesa',       'color' => 'bg-emerald-600', 'text' => 'text-emerald-600 dark:text-emerald-400',    'abbr' => 'MP'],
-                            'halotel'      => ['label' => 'Halotel',      'color' => 'bg-orange-500',  'text' => 'text-orange-600 dark:text-orange-400',      'abbr' => 'HL'],
-                            'mix_by_yas'   => ['label' => 'Mix by Yas',   'color' => 'bg-blue-600',    'text' => 'text-blue-600 dark:text-blue-400',          'abbr' => 'MX'],
+                            'airtel_money' => ['label' => 'Airtel Money', 'color' => 'bg-red-500',     'text' => 'text-red-600 dark:text-red-400',           'abbr' => 'AM', 'type' => 'Mobile Money'],
+                            'mpesa'        => ['label' => 'M-Pesa',       'color' => 'bg-emerald-600', 'text' => 'text-emerald-600 dark:text-emerald-400',    'abbr' => 'MP', 'type' => 'Mobile Money'],
+                            'halotel'      => ['label' => 'Halotel',      'color' => 'bg-orange-500',  'text' => 'text-orange-600 dark:text-orange-400',      'abbr' => 'HL', 'type' => 'Mobile Money'],
+                            'mix_by_yas'   => ['label' => 'Mix by Yas',   'color' => 'bg-blue-600',    'text' => 'text-blue-600 dark:text-blue-400',          'abbr' => 'MX', 'type' => 'Mobile Money'],
+                            'dpo_card'     => ['label' => 'Card Payment', 'color' => 'bg-purple-600',  'text' => 'text-purple-600 dark:text-purple-400',      'abbr' => 'CARD', 'type' => 'Visa, Mastercard'],
                         ];
                     @endphp
 
@@ -128,7 +129,7 @@
                             @endif
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $gateway['label'] }}</p>
-                                <p class="text-xs {{ $meta['text'] }}">Mobile Money</p>
+                                <p class="text-xs {{ $meta['text'] }}">{{ $meta['type'] ?? 'Mobile Money' }}</p>
                             </div>
                             <div :class="payment === '{{ $gateway['key'] }}' ? 'opacity-100' : 'opacity-0'" class="transition-opacity shrink-0">
                                 <svg class="h-5 w-5 text-navy dark:text-navy-light" fill="currentColor" viewBox="0 0 20 20">
@@ -140,8 +141,27 @@
                     </div>
                     @endif
 
-                    {{-- Phone number panel — slides in when a method is selected --}}
-                    <div x-show="payment !== ''"
+                    {{-- Card payment panel — redirect notice, no phone number needed --}}
+                    <div x-show="payment === 'dpo_card'"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-cloak
+                         class="mt-5 pt-5 border-t border-slate-100 dark:border-slate-700">
+                        <div class="flex items-center gap-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 px-4 py-3">
+                            <svg class="h-5 w-5 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <p class="text-sm text-purple-800 dark:text-purple-200">
+                                {{ __('You will be redirected to a secure page to pay') }}
+                                <strong class="font-bold">{{ money(($cart->sub_total ?? 0) - ($cart->discount ?? 0)) }}</strong>
+                                {{ __('by card.') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Phone number panel — slides in when a mobile money method is selected --}}
+                    <div x-show="payment !== '' && payment !== 'dpo_card'"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 -translate-y-2"
                          x-transition:enter-end="opacity-100 translate-y-0"
@@ -276,20 +296,27 @@
                         @if($manualPayment)
                         <span x-show="!submitting">{{ __('Confirm Booking') }}</span>
                         @else
-                        <span x-show="!submitting && payment !== '' && phone !== ''">
+                        <span x-show="!submitting && payment === 'dpo_card'">
+                            {{ __('Continue to Secure Card Payment') }}
+                        </span>
+                        <span x-show="!submitting && payment !== '' && payment !== 'dpo_card' && phone !== ''">
                             {{ __('Pay with') }} <span x-text="providerLabel"></span>
                         </span>
-                        <span x-show="!submitting && (payment === '' || !isPhoneValid)">
+                        <span x-show="!submitting && payment !== 'dpo_card' && (payment === '' || !isPhoneValid)">
                             {{ __('Select payment method & enter number') }}
                         </span>
                         @endif
                     </button>
 
-                    <p class="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
-                        {{ $manualPayment
-                            ? __('Your booking will be held pending manual payment confirmation by the hotel.')
-                            : __('You will receive a PIN prompt on your phone after clicking Pay.') }}
+                    <p class="mt-3 text-center text-xs text-slate-400 dark:text-slate-500" x-show="!manual">
+                        <span x-show="payment === 'dpo_card'">{{ __("You'll enter your card details on the next page.") }}</span>
+                        <span x-show="payment !== 'dpo_card'">{{ __('You will receive a PIN prompt on your phone after clicking Pay.') }}</span>
                     </p>
+                    @if($manualPayment)
+                    <p class="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+                        {{ __('Your booking will be held pending manual payment confirmation by the hotel.') }}
+                    </p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -310,6 +337,7 @@ function checkoutForm(manual) {
             mpesa:        'M-Pesa',
             halotel:      'Halotel',
             mix_by_yas:   'Mix by Yas',
+            dpo_card:     'Card Payment',
         },
 
         // Valid 2-digit prefixes per network
@@ -361,6 +389,7 @@ function checkoutForm(manual) {
 
         get canSubmit() {
             if (this.manual) return !this.submitting;
+            if (this.payment === 'dpo_card') return !this.submitting;
             return this.payment !== '' && this.isPhoneValid && !this.submitting;
         },
 

@@ -28,7 +28,15 @@
         </div>
 
         <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
-            @php $route = Route::currentRouteName(); @endphp
+            @php
+                $route    = Route::currentRouteName();
+                $myHotel  = auth()->user()->ownedHotels()->first();
+                $isMyHotel = str_starts_with($route ?? '', 'owner.hotels.')
+                    && ! str_starts_with($route ?? '', 'owner.hotels.staff')
+                    && ! str_starts_with($route ?? '', 'owner.hotels.features');
+                $pendingCancellations = $myHotel ? \App\Models\CancellationApproval::forHotel($myHotel->id)->pending()->count() : 0;
+                $pendingFeatureReqs   = $myHotel ? \App\Models\FeatureRequest::forHotel($myHotel->id)->pending()->count() : 0;
+            @endphp
 
             <a href="{{ route('owner.dashboard') }}"
                class="{{ str_starts_with($route ?? '', 'owner.dashboard') ? 'nav-link-active' : 'nav-link' }}">
@@ -38,16 +46,57 @@
                 {{ __('Dashboard') }}
             </a>
 
-            <a href="{{ route('owner.hotels.index') }}"
-               class="{{ str_starts_with($route ?? '', 'owner.hotels') ? 'nav-link-active' : 'nav-link' }}">
+            <a href="{{ $myHotel ? route('owner.hotels.show', $myHotel) : route('owner.hotels.create') }}"
+               class="{{ $isMyHotel ? 'nav-link-active' : 'nav-link' }}">
                 <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
-                {{ __('My Hotels') }}
+                {{ __('My Hotel') }}
             </a>
 
+            @if($myHotel)
+            <a href="{{ route('owner.hotels.staff.index', $myHotel) }}"
+               class="{{ str_starts_with($route ?? '', 'owner.hotels.staff') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-3.13a4 4 0 100-8 4 4 0 000 8zm6 3c1.657 0 3 1.79 3 4v2h-3m-9-6a4 4 0 00-4 4v2h9v-2a4 4 0 00-4-4z"/>
+                </svg>
+                {{ __('Staff') }}
+            </a>
+
+            @if($myHotel->hasFeature('advanced_analytics'))
+            <a href="{{ route('owner.analytics.index', $myHotel) }}"
+               class="{{ str_starts_with($route ?? '', 'owner.analytics') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                {{ __('Analytics') }}
+            </a>
+            @endif
+
+            <a href="{{ route('owner.cancellation-approvals.index', $myHotel) }}"
+               class="relative {{ str_starts_with($route ?? '', 'owner.cancellation-approvals') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                {{ __('Cancellations') }}
+                @if($pendingCancellations)
+                <span class="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">{{ $pendingCancellations }}</span>
+                @endif
+            </a>
+
+            <a href="{{ route('owner.hotels.features.index', $myHotel) }}"
+               class="relative {{ str_starts_with($route ?? '', 'owner.hotels.features') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                </svg>
+                {{ __('Premium Features') }}
+                @if($pendingFeatureReqs)
+                <span class="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">{{ $pendingFeatureReqs }}</span>
+                @endif
+            </a>
+            @endif
+
             @php
-                $myHotel = auth()->user()->ownedHotels()->first();
                 $viewSiteUrl = ($myHotel && $myHotel->status === 'active') ? route('hotels.show', $myHotel) : route('home');
             @endphp
             <a href="{{ $viewSiteUrl }}" target="_blank" rel="noopener" class="nav-link">

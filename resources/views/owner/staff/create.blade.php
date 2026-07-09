@@ -10,7 +10,7 @@
         @csrf
         <div class="card p-6 space-y-4">
             <p class="text-sm text-slate-500 dark:text-slate-400">
-                {{ __("Enter the staff member's email. If they already have an account they will be added immediately. If not, a new account will be created and they can reset their password via login.") }}
+                {{ __("Enter the staff member's email. If they already have an account they will be added immediately using their existing login. If not, a new account will be created and you'll be shown a one-time temporary password to hand to them directly — no email required.") }}
             </p>
 
             <div>

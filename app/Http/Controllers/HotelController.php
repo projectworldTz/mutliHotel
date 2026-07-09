@@ -57,7 +57,7 @@ class HotelController extends Controller
         view()->share('currentHotel', $hotel);
 
         $hotel->loadMissing([
-            'images', 'amenities', 'roomTypes.images', 'roomTypes.amenities',
+            'images', 'videos', 'amenities', 'roomTypes.images', 'roomTypes.amenities',
             'approvedReviews.user', 'category',
         ]);
 

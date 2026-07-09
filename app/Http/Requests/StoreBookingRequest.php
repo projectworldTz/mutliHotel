@@ -37,9 +37,17 @@ class StoreBookingRequest extends FormRequest
             return $base;
         }
 
+        $base += [
+            'payment_method' => ['required', 'in:airtel_money,mpesa,halotel,mix_by_yas,dpo_card'],
+        ];
+
+        // Card payments redirect to a hosted page — no Tanzanian mobile number needed.
+        if ($this->input('payment_method') === 'dpo_card') {
+            return $base;
+        }
+
         return $base + [
-            'payment_method' => ['required', 'in:airtel_money,mpesa,halotel,mix_by_yas'],
-            'phone_number'   => ['required', 'digits:9', 'regex:/^[67]\d{8}$/', $this->phoneNetworkRule()],
+            'phone_number' => ['required', 'digits:9', 'regex:/^[67]\d{8}$/', $this->phoneNetworkRule()],
         ];
     }
 

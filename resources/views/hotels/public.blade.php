@@ -179,12 +179,31 @@
 <nav class="sticky top-[61px] z-30 border-b border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex gap-1 overflow-x-auto scrollbar-none py-1">
-            @foreach(['overview' => __('Overview'), 'rooms' => __('Rooms'), 'amenities' => __('Amenities'), 'gallery' => __('Gallery'), 'reviews' => __('Reviews'), 'contact' => __('Contact')] as $key => $label)
+            @foreach(array_filter([
+                'overview'  => __('Overview'),
+                'rooms'     => __('Rooms'),
+                'amenities' => __('Amenities'),
+                'gallery'   => __('Gallery'),
+                'videos'    => $hotel->videos->isNotEmpty() ? __('Videos') : null,
+                'reviews'   => __('Reviews'),
+                'contact'   => __('Contact'),
+            ]) as $key => $label)
             <button @click="scrollTo('{{ $key }}')"
                     :class="activeSection === '{{ $key }}'
                         ? 'text-navy dark:text-amber-400 border-b-2 border-navy dark:border-amber-400'
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white border-b-2 border-transparent'"
-                    class="shrink-0 px-4 py-3 text-sm font-semibold transition whitespace-nowrap">
+                    class="shrink-0 px-4 py-3 text-sm font-semibold transition whitespace-nowrap {{ $key === 'videos' ? 'inline-flex items-center gap-1.5' : '' }}">
+                @if($key === 'videos')
+                <span class="relative inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-500">
+                    <svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                    </svg>
+                    <span class="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
+                    </span>
+                </span>
+                @endif
                 {{ $label }}
             </button>
             @endforeach
@@ -595,6 +614,33 @@
 @endif
 
 {{-- ═══════════════════════════════════════════════════════
+     VIDEOS
+════════════════════════════════════════════════════════ --}}
+@if($hotel->videos->isNotEmpty())
+<section id="sec-videos" class="py-14 border-t border-slate-100 dark:border-slate-800 scroll-mt-32">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-8">{{ __('Videos') }}</h2>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+        @foreach($hotel->videos as $video)
+        <div class="rounded-2xl overflow-hidden bg-slate-900 shadow-lg">
+            <div class="aspect-video">
+                @if($video->isUpload())
+                <video src="{{ $video->url }}" controls class="h-full w-full object-cover"></video>
+                @else
+                <iframe src="{{ $video->embed_url }}" class="h-full w-full" allowfullscreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                @endif
+            </div>
+            @if($video->title)
+            <p class="px-4 py-3 text-sm font-medium text-white">{{ $video->title }}</p>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</section>
+@endif
+
+{{-- ═══════════════════════════════════════════════════════
      REVIEWS
 ════════════════════════════════════════════════════════ --}}
 <section id="sec-reviews" class="py-14 border-t border-slate-100 dark:border-slate-800 scroll-mt-32">
@@ -821,7 +867,7 @@ function hotelPage() {
         },
 
         scrollspy() {
-            const sections = ['overview','rooms','amenities','gallery','reviews','contact'];
+            const sections = ['overview','rooms','amenities','gallery','videos','reviews','contact'];
             for (const id of [...sections].reverse()) {
                 const el = document.getElementById('sec-' + id);
                 if (el && el.getBoundingClientRect().top <= 130) {

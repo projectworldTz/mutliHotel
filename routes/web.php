@@ -131,6 +131,10 @@ Route::middleware('auth')->group(function () {
     if (app()->environment(['local', 'staging'])) {
         Route::post('/dev/payments/{payment}/confirm', [BookingController::class, 'devConfirmPayment'])
             ->name('dev.payment.confirm');
+
+        // Stand-in for DPO Pay's hosted card checkout page until real credentials are configured.
+        Route::get('/dev/payments/{payment}/dpo-simulate', [BookingController::class, 'dpoSimulate'])
+            ->name('dpo.simulate');
     }
 
     // Favourites
@@ -241,6 +245,9 @@ Route::middleware('auth')->group(function () {
             // Room types
             Route::get('/{hotel}/room-types/create', [OwnerHotelController::class, 'createRoomType'])->name('room-types.create');
             Route::post('/{hotel}/room-types', [OwnerHotelController::class, 'storeRoomType'])->name('room-types.store');
+            Route::get('/{hotel}/room-types/{roomType}/edit', [OwnerHotelController::class, 'editRoomType'])->name('room-types.edit');
+            Route::put('/{hotel}/room-types/{roomType}', [OwnerHotelController::class, 'updateRoomType'])->name('room-types.update');
+            Route::delete('/{hotel}/room-types/{roomType}', [OwnerHotelController::class, 'destroyRoomType'])->name('room-types.destroy');
             Route::post('/{hotel}/room-types/{roomType}/images', [OwnerHotelController::class, 'storeRoomTypeImages'])->name('room-types.images.store');
             Route::post('/room-type-images/{image}/set-cover', [OwnerHotelController::class, 'setCoverRoomTypeImage'])->name('room-type-images.set-cover');
             Route::delete('/room-type-images/{image}', [OwnerHotelController::class, 'deleteRoomTypeImage'])->name('room-type-images.destroy');
@@ -248,12 +255,18 @@ Route::middleware('auth')->group(function () {
 
             // Physical rooms
             Route::post('/{hotel}/room-types/{roomType}/rooms', [OwnerHotelController::class, 'storeRoom'])->name('rooms.store');
+            Route::put('/{hotel}/room-types/{roomType}/rooms/{room}', [OwnerHotelController::class, 'updateRoom'])->name('rooms.update');
+            Route::delete('/{hotel}/room-types/{roomType}/rooms/{room}', [OwnerHotelController::class, 'destroyRoom'])->name('rooms.destroy');
 
             // Images
             Route::post('/{hotel}/images', [OwnerHotelController::class, 'storeImages'])->name('images.store');
             Route::post('/images/{image}/set-cover', [OwnerHotelController::class, 'setCoverImage'])->name('images.set-cover');
             Route::delete('/images/{image}', [OwnerHotelController::class, 'deleteImage'])->name('images.destroy');
             Route::delete('/images', [OwnerHotelController::class, 'deleteImages'])->name('images.bulk-destroy');
+
+            // Promo videos
+            Route::post('/{hotel}/videos', [OwnerHotelController::class, 'storeVideo'])->name('videos.store');
+            Route::delete('/videos/{video}', [OwnerHotelController::class, 'deleteVideo'])->name('videos.destroy');
 
             // Payment methods
             Route::post('/{hotel}/payment-methods', [OwnerHotelController::class, 'updatePaymentMethods'])->name('payment-methods.update');
