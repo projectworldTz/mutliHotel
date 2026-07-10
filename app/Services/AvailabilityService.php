@@ -142,6 +142,40 @@ class AvailabilityService
     }
 
     /**
+     * Build a per-room-level calendar for a room type for a given month, used by the
+     * receptionist availability screen. Unlike calendarForRoomType() (which only flags a
+     * date "booked" once every room of the type is sold out), this distinguishes a date
+     * with some — but not all — rooms booked as "partial", so a single booking is visible.
+     * Each day entry: ['date' => string, 'status' => available|partial|booked|past]
+     */
+    public function detailedCalendarForRoomType(RoomType $roomType, int $year, int $month): array
+    {
+        $from = Carbon::create($year, $month, 1)->startOfMonth()->toDateString();
+        $to   = Carbon::create($year, $month, 1)->endOfMonth()->toDateString();
+
+        $totalRooms    = $roomType->rooms()->available()->count();
+        $blockedCounts = $this->availabilityRepository->blockedCountsForType($roomType->id, $from, $to);
+
+        $calendar = [];
+        foreach (CarbonPeriod::create($from, $to) as $date) {
+            $dateStr = $date->toDateString();
+            $isPast  = $date->isPast() && ! $date->isToday();
+            $blocked = (int) ($blockedCounts[$dateStr] ?? 0);
+
+            $status = match (true) {
+                $isPast                        => 'past',
+                $blocked === 0                 => 'available',
+                $totalRooms > 0 && $blocked >= $totalRooms => 'booked',
+                default                        => 'partial',
+            };
+
+            $calendar[] = ['date' => $dateStr, 'status' => $status];
+        }
+
+        return $calendar;
+    }
+
+    /**
      * Validate that a proposed stay window makes sense.
      * Returns ['valid' => bool, 'errors' => array].
      */

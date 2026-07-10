@@ -356,6 +356,8 @@ Route::middleware('auth')->group(function () {
 
         // Availability
         Route::get('/availability', [ReceptionistAvailability::class, 'index'])->name('availability');
+        Route::get('/availability/{roomType}/calendar/{year}/{month}', [ReceptionistAvailability::class, 'calendar'])
+            ->name('availability.calendar');
 
         // Guests
         Route::prefix('guests')->name('guests.')->group(function () {

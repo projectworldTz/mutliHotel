@@ -24,6 +24,27 @@ class AvailabilityRepository
     }
 
     /**
+     * Return how many rooms of a given type are blocked, per date, in a range.
+     * Used to distinguish "no rooms booked" / "some rooms booked" / "fully booked".
+     */
+    public function blockedCountsForType(int $roomTypeId, string $from, string $to): array
+    {
+        $roomIds = Room::where('room_type_id', $roomTypeId)->available()->pluck('id')->toArray();
+
+        if (empty($roomIds)) {
+            return [];
+        }
+
+        return RoomAvailability::whereIn('room_id', $roomIds)
+            ->unavailable()
+            ->inRange($from, $to)
+            ->selectRaw('date, COUNT(DISTINCT room_id) as blocked_count')
+            ->groupBy('date')
+            ->pluck('blocked_count', 'date')
+            ->toArray();
+    }
+
+    /**
      * Return all dates that are blocked across ALL rooms of a given room type.
      * A date is "fully blocked" only when every room of the type is blocked on that date.
      */

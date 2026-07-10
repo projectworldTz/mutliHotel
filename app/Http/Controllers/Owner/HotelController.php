@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Services\HotelService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class HotelController extends Controller
 {
@@ -147,9 +148,14 @@ class HotelController extends Controller
         abort_if($roomType->hotel_id !== $hotel->id, 404);
 
         $data = $request->validate([
-            'room_number' => 'required|string|max:20',
+            'room_number' => [
+                'required', 'string', 'max:20',
+                Rule::unique('rooms')->where('hotel_id', $hotel->id)->whereNull('deleted_at'),
+            ],
             'floor'       => 'nullable|integer',
             'status'      => 'in:available,maintenance,out_of_service',
+        ], [
+            'room_number.unique' => 'Room :input is already in use at this hotel.',
         ]);
 
         $this->hotelService->createRoom($hotel, $roomType, $data);
@@ -211,9 +217,14 @@ class HotelController extends Controller
         abort_if($roomType->hotel_id !== $hotel->id || $room->room_type_id !== $roomType->id, 404);
 
         $data = $request->validate([
-            'room_number' => 'required|string|max:20',
+            'room_number' => [
+                'required', 'string', 'max:20',
+                Rule::unique('rooms')->where('hotel_id', $hotel->id)->whereNull('deleted_at')->ignore($room->id),
+            ],
             'floor'       => 'nullable|integer',
             'status'      => 'in:available,maintenance,out_of_service',
+        ], [
+            'room_number.unique' => 'Room :input is already in use at this hotel.',
         ]);
 
         $this->hotelService->updateRoom($room, $data);

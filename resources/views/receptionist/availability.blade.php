@@ -7,7 +7,8 @@
     <p class="text-sm text-slate-500 dark:text-slate-400">
         {{ __('Current month availability per room type.') }}
         <span class="inline-flex items-center gap-1 ml-2"><span class="inline-block h-3 w-3 rounded bg-emerald-100"></span> {{ __('Available') }}</span>
-        <span class="inline-flex items-center gap-1 ml-1"><span class="inline-block h-3 w-3 rounded bg-rose-100"></span> {{ __('Booked') }}</span>
+        <span class="inline-flex items-center gap-1 ml-1"><span class="inline-block h-3 w-3 rounded bg-amber-100"></span> {{ __('Partially Booked') }}</span>
+        <span class="inline-flex items-center gap-1 ml-1"><span class="inline-block h-3 w-3 rounded bg-rose-100"></span> {{ __('Fully Booked') }}</span>
     </p>
     <a href="{{ route('receptionist.bookings.create') }}" class="btn-gold btn-sm ml-auto">+ {{ __('New Booking') }}</a>
 </div>
@@ -18,7 +19,7 @@
     @json($calendar),
     {{ now()->year }},
     {{ now()->month }},
-    "{{ route('hotels.room.calendar', [$hotel, $rt, '__YEAR__', '__MONTH__']) }}"
+    "{{ route('receptionist.availability.calendar', [$rt, '__YEAR__', '__MONTH__']) }}"
 )'>
     <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
         <div>
@@ -45,6 +46,7 @@
             <template x-for="day in days" :key="day.date">
                 <div :class="{
                         'bg-rose-100 text-rose-400 dark:bg-rose-900/30': day.status === 'booked',
+                        'bg-amber-100 text-amber-700 dark:bg-amber-900/30': day.status === 'partial',
                         'bg-slate-100 text-slate-300 dark:bg-slate-800': day.status === 'past',
                         'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20': day.status === 'available',
                      }"

@@ -22,7 +22,7 @@ class AvailabilityController extends Controller
         $to   = $request->input('to', now()->addDays(14)->toDateString());
 
         $grid = $roomTypes->map(function (RoomType $rt) use ($from, $to) {
-            $calendar = $this->availabilityService->calendarForRoomType($rt, now()->year, now()->month);
+            $calendar = $this->availabilityService->detailedCalendarForRoomType($rt, now()->year, now()->month);
             return [
                 'room_type' => $rt,
                 'calendar'  => $calendar,
@@ -31,5 +31,16 @@ class AvailabilityController extends Controller
         });
 
         return view('receptionist.availability', compact('hotel', 'grid', 'from', 'to', 'roomTypes'));
+    }
+
+    /** AJAX: detailed (available/partial/booked) calendar for a room type in a given month. */
+    public function calendar(Request $request, RoomType $roomType, int $year, int $month)
+    {
+        $hotel = $request->attributes->get('assigned_hotel');
+        abort_if($roomType->hotel_id !== $hotel->id, 404);
+
+        $calendar = $this->availabilityService->detailedCalendarForRoomType($roomType, $year, $month);
+
+        return response()->json(['calendar' => $calendar, 'year' => $year, 'month' => $month]);
     }
 }
