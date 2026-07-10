@@ -8,6 +8,7 @@ use App\Services\CancellationService;
 use App\Models\BookingRoom;
 use App\Models\Hotel;
 use App\Models\HousekeepingTask;
+use App\Models\Payment;
 use App\Models\ReservationCart;
 use App\Models\ReservationCartItem;
 use App\Models\Room;
@@ -241,6 +242,23 @@ class BookingService
             'status'       => Booking::STATUS_CONFIRMED,
             'confirmed_at' => now(),
         ]);
+
+        // Confirming a booking (incl. a receptionist/owner/admin confirming a
+        // manual payment) means payment has been received — reflect that on
+        // the payment record and invoice, which otherwise stay stuck on
+        // "pending"/"draft" since nothing else transitions them.
+        $payment = Payment::where('booking_id', $booking->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first();
+
+        if ($payment) {
+            $payment->update(['status' => 'paid']);
+        }
+
+        if ($booking->invoice && $booking->invoice->status !== 'paid') {
+            $this->invoiceService->markPaid($booking->invoice);
+        }
 
         return $booking;
     }

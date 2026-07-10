@@ -219,7 +219,7 @@ class Booking extends Model
 
     public function getIsCancellableAttribute(): bool
     {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_CONFIRMED]);
+        return $this->status === self::STATUS_PENDING;
     }
 
     /** Refund amount recorded on the linked Payment (null when no refund was issued). */

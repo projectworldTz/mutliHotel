@@ -153,7 +153,10 @@
 
     /* ── Tables ──────────────────────────────────────────────────────── */
     .table-wrap  { @apply overflow-x-auto rounded-xl ring-1 ring-slate-200 dark:ring-slate-700; }
-    .table       { @apply min-w-full divide-y divide-slate-200 dark:divide-slate-700; }
+    .table       { @apply w-full min-w-full divide-y divide-slate-200 dark:divide-slate-700; }
+    .table thead { @apply bg-slate-50 dark:bg-slate-800/50; }
+    .table th    { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400; }
+    .table td    { @apply px-4 py-3.5 text-sm align-middle text-slate-700 dark:text-slate-300; }
     .th          { @apply bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/50 dark:text-slate-400; }
     .td          { @apply px-4 py-3.5 text-sm text-slate-700 dark:text-slate-300; }
     .tr-hover    { @apply transition hover:bg-slate-50 dark:hover:bg-slate-800/40; }

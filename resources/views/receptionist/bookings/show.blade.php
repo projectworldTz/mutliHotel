@@ -102,7 +102,7 @@
             </form>
             @endif
 
-            @if(!in_array($booking->status, ['cancelled','refunded','checked_out']))
+            @if($booking->is_cancellable)
             <form method="POST" action="{{ route('receptionist.bookings.cancel', $booking) }}"
                   x-data x-on:submit.prevent="if(confirm('{{ __('Cancel this booking?') }}')) $el.submit()">
                 @csrf

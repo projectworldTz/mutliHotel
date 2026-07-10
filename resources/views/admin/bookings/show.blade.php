@@ -73,7 +73,7 @@
                 <button class="btn-outline w-full">{{ __('Check Out') }}</button>
             </form>
             @endif
-            @if(!in_array($booking->status, ['cancelled','refunded','checked_out']))
+            @if($booking->is_cancellable)
             <form method="POST" action="{{ route('admin.bookings.cancel', $booking) }}">
                 @csrf
                 <button class="btn-danger w-full" onclick="return confirm('{{ __('Cancel this booking?') }}')">{{ __('Cancel') }}</button>
