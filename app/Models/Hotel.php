@@ -267,8 +267,7 @@ class Hotel extends Model
             return static::where('slug', $slug)->where('status', 'active')->first();
         }
 
-        // Single-hotel system: no other hotel to disambiguate between.
-        return static::active()->first();
+        return null;
     }
 
     public function isOwnedBy(User $user): bool

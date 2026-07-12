@@ -22,6 +22,7 @@ class StoreHotelRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'owner_id'            => [$this->routeIs('admin.hotels.store') ? 'required' : 'nullable', 'exists:users,id'],
             'name'                => ['required', 'string', 'max:255'],
             'hotel_category_id'   => ['nullable', 'exists:hotel_categories,id'],
             'description'         => ['nullable', 'string'],

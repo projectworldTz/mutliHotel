@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreHotelRequest;
+use App\Models\Amenity;
 use App\Models\Hotel;
+use App\Models\HotelCategory;
+use App\Models\User;
 use App\Services\AuditService;
 use App\Services\HotelService;
 use Illuminate\Http\Request;
@@ -21,6 +25,38 @@ class HotelController extends Controller
         $hotels  = $this->hotelService->allForAdmin($filters);
 
         return view('admin.hotels.index', compact('hotels', 'filters'));
+    }
+
+    public function create()
+    {
+        $owners     = User::whereHas('roles', fn ($q) => $q->where('name', 'hotel-owner'))->orderBy('name')->get();
+        $categories = HotelCategory::active()->orderBy('name')->get();
+        $amenities  = Amenity::orderBy('category')->orderBy('name')->get();
+
+        return view('admin.hotels.create', compact('owners', 'categories', 'amenities'));
+    }
+
+    public function store(StoreHotelRequest $request)
+    {
+        $data = $request->validated();
+
+        $owner = User::findOrFail($data['owner_id']);
+        abort_unless($owner->isHotelOwner(), 422, 'Selected user is not a hotel owner.');
+        abort_unless($owner->canAddHotel(), 422, "{$owner->name} has reached their hotel limit.");
+
+        unset($data['owner_id']);
+        $hotel = $this->hotelService->create($data, $owner);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $file) {
+                $this->hotelService->uploadImage($hotel, $file, $index === 0);
+            }
+        }
+
+        $this->auditService->logHotelAction('hotel.created', $hotel, ['owner_id' => $owner->id]);
+
+        return redirect()->route('admin.hotels.show', $hotel)
+            ->with('success', "\"{$hotel->name}\" created for {$owner->name}.");
     }
 
     public function approve(Hotel $hotel)

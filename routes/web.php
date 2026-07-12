@@ -75,13 +75,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{post}', [BlogController::class, 'show'])->name('blog.show');
 
-// Hotel browsing — listing removed (SaaS: no global hotel directory)
+// Hotel browsing — marketplace directory across all active hotels
 Route::prefix('hotels')->name('hotels.')->group(function () {
-    // "Browse Hotels" CTAs mean "take me back to the hotel I'm dealing with" in
-    // this single-tenant-per-guest model. Fall back to home only if unresolvable.
-    Route::get('/', fn () => ($hotel = \App\Models\Hotel::currentForGuest())
-        ? redirect()->route('hotels.show', $hotel)
-        : redirect()->route('home'))->name('index');
+    Route::get('/', [HotelController::class, 'index'])->name('index');
     Route::get('/{hotel}', [HotelController::class, 'show'])->name('show');
     Route::get('/{hotel}/availability', [HotelController::class, 'availability'])->name('availability');
     Route::get('/{hotel}/rooms/{roomType}', [RoomController::class, 'show'])->name('room.show');
@@ -151,6 +147,8 @@ Route::middleware('auth')->group(function () {
         // Hotels — list + moderation actions
         Route::prefix('hotels')->name('hotels.')->group(function () {
             Route::get('/',                [AdminHotelController::class,   'index'])->name('index');
+            Route::get('/create',          [AdminHotelController::class,   'create'])->name('create');
+            Route::post('/',               [AdminHotelController::class,   'store'])->name('store');
             Route::post('/{hotel}/approve', [AdminHotelController::class, 'approve'])->name('approve');
             Route::post('/{hotel}/suspend', [AdminHotelController::class, 'suspend'])->name('suspend');
             Route::post('/{hotel}/featured', [AdminHotelController::class, 'toggleFeatured'])->name('featured');

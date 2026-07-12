@@ -17,6 +17,7 @@
         <button type="submit" class="btn-primary btn-sm">{{ __('Filter') }}</button>
         <a href="{{ route('admin.hotels.index') }}" class="btn-ghost btn-sm">{{ __('Reset') }}</a>
     </form>
+    <a href="{{ route('admin.hotels.create') }}" class="btn-primary btn-sm">{{ __('+ Add Hotel') }}</a>
 </div>
 
 <div class="card table-wrap">

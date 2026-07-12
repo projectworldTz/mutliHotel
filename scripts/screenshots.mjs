@@ -12,7 +12,7 @@ import path from 'path';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const BASE        = 'http://localhost/OOP/booking_system/public';
+const BASE        = 'http://localhost/OOP/multiHotel/public';
 const OUT_DIR     = path.resolve('portfolio_screenshots');
 const VIEWPORT    = { width: 1440, height: 900 };
 const DELAY_MS    = 1200;   // wait after navigation for animations to settle

@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-const BASE = 'http://localhost/OOP/booking_system/public';
+const BASE = 'http://localhost/OOP/multiHotel/public';
 
 const browser = await puppeteer.launch({
   executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
