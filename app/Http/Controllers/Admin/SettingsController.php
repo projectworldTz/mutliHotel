@@ -29,6 +29,8 @@ class SettingsController extends Controller
             'settings.demo_owner_password'      => ['nullable', 'string', 'max:255'],
             'settings.demo_superadmin_email'    => ['nullable', 'email', 'max:255'],
             'settings.demo_superadmin_password' => ['nullable', 'string', 'max:255'],
+            'settings.demo_hotel_name'          => ['nullable', 'string', 'max:100'],
+            'settings.demo_hotel_url'           => ['nullable', 'url', 'max:255'],
         ]);
 
         foreach ($validated['settings'] as $key => $value) {

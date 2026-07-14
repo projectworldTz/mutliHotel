@@ -115,6 +115,28 @@
                     </div>
                 </div>
             </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">Demo Hotel (Public Page)</h3>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="form-label">Hotel Name</label>
+                        <input type="text" name="settings[demo_hotel_name]"
+                               value="{{ $settings['demo_hotel_name'] ?? '' }}"
+                               placeholder="Tranquiloo Hotel"
+                               class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Hotel URL</label>
+                        <input type="url" name="settings[demo_hotel_url]"
+                               value="{{ $settings['demo_hotel_url'] ?? '' }}"
+                               placeholder="https://tranquiloo-hotel.com"
+                               class="form-input">
+                    </div>
+                </div>
+                <p class="mt-2 text-xs text-slate-400">Link to a live hotel's public page so prospects can browse a real storefront. Leave the URL blank to hide this button.</p>
+            </div>
+
             <p class="mt-4 text-xs text-slate-400">Use accounts you're comfortable exposing publicly — anyone can log in with these. Leave a field blank to hide that block on the landing page.</p>
         </div>
     </div>

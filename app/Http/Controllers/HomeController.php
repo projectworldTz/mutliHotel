@@ -22,6 +22,8 @@ class HomeController extends Controller
                 'owner_password'      => Setting::get('demo_owner_password'),
                 'superadmin_email'    => Setting::get('demo_superadmin_email'),
                 'superadmin_password' => Setting::get('demo_superadmin_password'),
+                'hotel_name'          => Setting::get('demo_hotel_name'),
+                'hotel_url'           => Setting::get('demo_hotel_url'),
             ];
         }
 

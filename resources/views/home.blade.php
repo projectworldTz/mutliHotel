@@ -55,7 +55,7 @@
 
         {{-- Scroll indicator --}}
         <div class="mt-16 flex justify-center" data-reveal data-reveal-delay="500">
-            @if($demoCredentials && ($demoCredentials['owner_email'] || $demoCredentials['superadmin_email']))
+            @if($demoCredentials && ($demoCredentials['owner_email'] || $demoCredentials['superadmin_email'] || $demoCredentials['hotel_url']))
                 <a href="#demo-credentials" id="scroll-to-demo"
                    class="flex flex-col items-center gap-2 text-gold-light hover:text-white transition-colors duration-200">
                     <span id="scroll-to-demo-text"
@@ -150,7 +150,7 @@
 </section>
 
 {{-- ── Demo credentials ─────────────────────────────────────────────────────── --}}
-@if($demoCredentials && ($demoCredentials['owner_email'] || $demoCredentials['superadmin_email']))
+@if($demoCredentials && ($demoCredentials['owner_email'] || $demoCredentials['superadmin_email'] || $demoCredentials['hotel_url']))
 <section id="demo-credentials" class="bg-white dark:bg-slate-900 py-20">
     <div class="mx-auto max-w-5xl px-6">
         <div class="text-center mb-12" data-reveal>
@@ -205,6 +205,18 @@
             </div>
             @endif
         </div>
+
+        @if($demoCredentials['hotel_url'])
+        <div class="mt-8 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-6 text-center" data-reveal data-reveal-delay="160">
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                {{ __('Prefer to just look around first?') }}
+            </p>
+            <a href="{{ $demoCredentials['hotel_url'] }}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 rounded-xl border border-navy px-5 py-2.5 text-sm font-semibold text-navy hover:bg-navy hover:text-white dark:text-white dark:border-white/30 dark:hover:bg-white/10 transition-colors duration-200">
+                {{ __('Visit :hotel', ['hotel' => $demoCredentials['hotel_name'] ?: __('Demo Hotel')]) }} &rarr;
+            </a>
+        </div>
+        @endif
     </div>
 </section>
 @endif
