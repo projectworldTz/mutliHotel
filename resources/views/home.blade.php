@@ -1,6 +1,12 @@
 @extends('layouts.app')
 @section('title', __('Hotel Management Platform'))
 
+@push('head')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+@endpush
+
 @section('content')
 
 {{-- ── Hero ─────────────────────────────────────────────────────────────────── --}}
@@ -49,12 +55,25 @@
 
         {{-- Scroll indicator --}}
         <div class="mt-16 flex justify-center" data-reveal data-reveal-delay="500">
-            <div class="flex flex-col items-center gap-1.5 text-white/50 text-xs">
-                <span>{{ __('Scroll to explore') }}</span>
-                <svg class="h-5 w-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </div>
+            @if($demoCredentials && ($demoCredentials['owner_email'] || $demoCredentials['superadmin_email']))
+                <a href="#demo-credentials" id="scroll-to-demo"
+                   class="flex flex-col items-center gap-2 text-gold-light hover:text-white transition-colors duration-200">
+                    <span id="scroll-to-demo-text"
+                          class="font-demo text-lg sm:text-xl font-extrabold uppercase tracking-wide text-center drop-shadow-[0_1px_6px_rgba(201,162,39,0.55)]">
+                        {{ __('Click here to get demo credentials') }}
+                    </span>
+                    <svg class="h-7 w-7 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </a>
+            @else
+                <div class="flex flex-col items-center gap-1.5 text-white/50 text-xs">
+                    <span>{{ __('Scroll to explore') }}</span>
+                    <svg class="h-5 w-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            @endif
         </div>
     </div>
 </section>
@@ -129,6 +148,66 @@
         </div>
     </div>
 </section>
+
+{{-- ── Demo credentials ─────────────────────────────────────────────────────── --}}
+@if($demoCredentials && ($demoCredentials['owner_email'] || $demoCredentials['superadmin_email']))
+<section id="demo-credentials" class="bg-white dark:bg-slate-900 py-20">
+    <div class="mx-auto max-w-5xl px-6">
+        <div class="text-center mb-12" data-reveal>
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
+                {{ __('Try it yourself — no sign-up needed') }}
+            </h2>
+            <p class="mt-3 text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                {{ __('Log in with the demo accounts below to explore the platform firsthand.') }}
+            </p>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2" data-stagger="80">
+            @if($demoCredentials['owner_email'] && $demoCredentials['owner_password'])
+            <div class="rounded-2xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-6">
+                <h3 class="font-semibold text-slate-900 dark:text-white mb-1">{{ __('Hotel Owner Demo') }}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ __('See how an existing hotel manages bookings, rooms and staff.') }}</p>
+                <dl class="space-y-2 text-sm">
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500 dark:text-slate-400">{{ __('Email') }}</dt>
+                        <dd class="font-mono text-slate-900 dark:text-white">{{ $demoCredentials['owner_email'] }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500 dark:text-slate-400">{{ __('Password') }}</dt>
+                        <dd class="font-mono text-slate-900 dark:text-white">{{ $demoCredentials['owner_password'] }}</dd>
+                    </div>
+                </dl>
+                <a href="{{ route('login') }}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy/90 transition-colors duration-200">
+                    {{ __('Sign in as owner') }} &rarr;
+                </a>
+            </div>
+            @endif
+
+            @if($demoCredentials['superadmin_email'] && $demoCredentials['superadmin_password'])
+            <div class="rounded-2xl border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-6">
+                <h3 class="font-semibold text-slate-900 dark:text-white mb-1">{{ __('Super Admin Demo') }}</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ __('See the platform-wide dashboard across all hotels.') }}</p>
+                <dl class="space-y-2 text-sm">
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500 dark:text-slate-400">{{ __('Email') }}</dt>
+                        <dd class="font-mono text-slate-900 dark:text-white">{{ $demoCredentials['superadmin_email'] }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-slate-500 dark:text-slate-400">{{ __('Password') }}</dt>
+                        <dd class="font-mono text-slate-900 dark:text-white">{{ $demoCredentials['superadmin_password'] }}</dd>
+                    </div>
+                </dl>
+                <a href="{{ route('login') }}"
+                   class="mt-5 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white hover:bg-navy/90 transition-colors duration-200">
+                    {{ __('Sign in as super admin') }} &rarr;
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+</section>
+@endif
 
 {{-- ── CTA ──────────────────────────────────────────────────────────────────── --}}
 <section class="bg-navy py-16 text-center text-white">

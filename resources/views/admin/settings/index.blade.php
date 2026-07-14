@@ -65,6 +65,58 @@
                 </div>
             </div>
         </div>
+
+        {{-- Demo Credentials --}}
+        <div class="card p-6 lg:col-span-2">
+            <h2 class="text-base font-bold text-slate-900 dark:text-white mb-1">Demo Credentials (Public Page)</h2>
+            <p class="text-xs text-slate-400 mb-5">Shown on the public landing page so prospects can log in and explore the platform themselves, without contacting you directly.</p>
+
+            <div>
+                <label class="flex items-center gap-2 cursor-pointer mb-5">
+                    <input type="hidden" name="settings[demo_credentials_enabled]" value="0">
+                    <input type="checkbox" name="settings[demo_credentials_enabled]" value="1"
+                        {{ ($settings['demo_credentials_enabled'] ?? '0') == '1' ? 'checked' : '' }}
+                        class="rounded accent-navy">
+                    <span class="text-sm text-slate-700 dark:text-slate-200">Show demo credentials on the public landing page</span>
+                </label>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2">
+                <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Hotel Owner Demo</h3>
+                    <div>
+                        <label class="form-label">Owner Email</label>
+                        <input type="email" name="settings[demo_owner_email]"
+                               value="{{ $settings['demo_owner_email'] ?? '' }}"
+                               placeholder="owner@example.com"
+                               class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Owner Password</label>
+                        <input type="text" name="settings[demo_owner_password]"
+                               value="{{ $settings['demo_owner_password'] ?? '' }}"
+                               class="form-input">
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Super Admin Demo</h3>
+                    <div>
+                        <label class="form-label">Super Admin Email</label>
+                        <input type="email" name="settings[demo_superadmin_email]"
+                               value="{{ $settings['demo_superadmin_email'] ?? '' }}"
+                               placeholder="admin@example.com"
+                               class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label">Super Admin Password</label>
+                        <input type="text" name="settings[demo_superadmin_password]"
+                               value="{{ $settings['demo_superadmin_password'] ?? '' }}"
+                               class="form-input">
+                    </div>
+                </div>
+            </div>
+            <p class="mt-4 text-xs text-slate-400">Use accounts you're comfortable exposing publicly — anyone can log in with these. Leave a field blank to hide that block on the landing page.</p>
+        </div>
     </div>
 
     <div class="mt-5">

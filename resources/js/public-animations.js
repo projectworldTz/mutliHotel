@@ -138,7 +138,7 @@ export function initPublicAnimations() {
 
 
     // ── 9. Smooth scroll for in-page anchor links ─────────────────────────────
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    document.querySelectorAll('a[href^="#"]:not(#scroll-to-demo)').forEach(anchor => {
         anchor.addEventListener('click', e => {
             const target = document.querySelector(anchor.getAttribute('href'));
             if (!target) return;
@@ -173,6 +173,27 @@ export function initPublicAnimations() {
         img.classList.add('img-loading');
         img.addEventListener('load', () => img.classList.remove('img-loading'), { once: true });
     });
+
+
+    // ── 13. "Scroll down to get demo credentials" hero prompt ────────────────
+    const scrollToDemo = document.getElementById('scroll-to-demo');
+    if (scrollToDemo) {
+        const label       = document.getElementById('scroll-to-demo-text');
+        const targetId    = scrollToDemo.getAttribute('href');
+        const targetPulse = () => label?.classList.add('scroll-hint-pulse');
+        targetPulse();
+
+        scrollToDemo.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(targetId);
+            if (!target) return;
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            target.classList.add('demo-credentials-highlight');
+            target.addEventListener('animationend', () => {
+                target.classList.remove('demo-credentials-highlight');
+            }, { once: true });
+        });
+    }
 
 }
 
@@ -253,6 +274,24 @@ body.page-loaded { opacity: 1; }
     pointer-events: none;
     will-change: transform;
 }
+
+/* ── Scroll-to-demo hint ── */
+@keyframes scroll-hint-pulse {
+    0%, 100% { opacity: 1;    transform: scale(1); }
+    50%      { opacity: 0.6;  transform: scale(1.07); }
+}
+.scroll-hint-pulse {
+    display: inline-block;
+    animation: scroll-hint-pulse 1.6s ease-in-out infinite;
+}
+
+/* ── Demo credentials section highlight-on-arrival ── */
+@keyframes demo-credentials-highlight {
+    0%   { box-shadow: 0 0 0 0 rgba(201,162,39,0.45); }
+    50%  { box-shadow: 0 0 0 12px rgba(201,162,39,0); }
+    100% { box-shadow: 0 0 0 0 rgba(201,162,39,0); }
+}
+.demo-credentials-highlight { animation: demo-credentials-highlight 1.2s ease-out; }
 
     `;
     document.head.appendChild(style);
