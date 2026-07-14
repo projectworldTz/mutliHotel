@@ -171,7 +171,10 @@ class BookingController extends Controller
 
         abort_unless($booking->user_id === Auth::id() || $user->isSuperAdmin(), 403);
 
-        $booking->loadMissing(['hotel.images', 'rooms.roomType', 'payment', 'invoice', 'mealPackages']);
+        $booking->loadMissing([
+            'hotel.images', 'rooms.roomType', 'payment', 'invoice', 'mealPackages',
+            'maintenanceRequests', 'messages', 'digitalCheckin',
+        ]);
 
         return view('booking.show', compact('booking'));
     }

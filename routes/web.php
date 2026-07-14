@@ -47,6 +47,16 @@ use App\Http\Controllers\Accountant\DashboardController as AccountantDashboard;
 use App\Http\Controllers\Accountant\InvoiceController as AccountantInvoiceController;
 use App\Http\Controllers\Accountant\ReportController as AccountantReportController;
 use App\Http\Controllers\Accountant\ExpenseController as AccountantExpenseController;
+use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\CheckinController;
+use App\Http\Controllers\Owner\MaintenanceController as OwnerMaintenanceController;
+use App\Http\Controllers\Owner\ShiftController as OwnerShiftController;
+use App\Http\Controllers\Owner\GroupBookingController as OwnerGroupBookingController;
+use App\Http\Controllers\Receptionist\MaintenanceController as ReceptionistMaintenanceController;
+use App\Http\Controllers\Receptionist\MessageController as ReceptionistMessageController;
+use App\Http\Controllers\Receptionist\CheckinController as ReceptionistCheckinController;
+use App\Http\Controllers\Receptionist\ShiftController as ReceptionistShiftController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -133,6 +143,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{bookingNumber}', [BookingController::class, 'show'])->name('show');
         Route::post('/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('cancel');
         Route::get('/{bookingNumber}/invoice', [BookingController::class, 'invoice'])->name('invoice');
+        Route::post('/{bookingNumber}/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
+        Route::post('/{bookingNumber}/messages', [MessageController::class, 'store'])->name('messages.store');
+        Route::post('/{bookingNumber}/checkin', [CheckinController::class, 'store'])->name('checkin.store');
     });
 
     // Development-only: simulate mobile money payment confirmation
@@ -354,6 +367,24 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [OwnerSurveyController::class, 'index'])->name('index');
         });
 
+        // Maintenance Requests (read-only overview)
+        Route::get('/hotels/{hotel}/maintenance', [OwnerMaintenanceController::class, 'index'])->name('maintenance.index');
+
+        // Staff Scheduling
+        Route::prefix('hotels/{hotel}/shifts')->name('shifts.')->group(function () {
+            Route::get('/',            [OwnerShiftController::class, 'index'])->name('index');
+            Route::post('/',           [OwnerShiftController::class, 'store'])->name('store');
+            Route::delete('/{shift}',  [OwnerShiftController::class, 'destroy'])->name('destroy');
+        });
+
+        // Group Booking Manager
+        Route::prefix('hotels/{hotel}/group-bookings')->name('group-bookings.')->group(function () {
+            Route::get('/',                  [OwnerGroupBookingController::class, 'index'])->name('index');
+            Route::post('/',                 [OwnerGroupBookingController::class, 'store'])->name('store');
+            Route::put('/{groupBooking}',    [OwnerGroupBookingController::class, 'update'])->name('update');
+            Route::delete('/{groupBooking}', [OwnerGroupBookingController::class, 'destroy'])->name('destroy');
+        });
+
         // Premium Feature Requests
         Route::prefix('hotels/{hotel}/features')->name('hotels.features.')->group(function () {
             Route::get('/',  [OwnerFeatureRequestController::class, 'index'])->name('index');
@@ -426,6 +457,30 @@ Route::middleware('auth')->group(function () {
             Route::post('/bookings/{booking}/request',           [ReceptionistCancellationController::class, 'request'])->name('request');
             Route::post('/{approval}/execute',                   [ReceptionistCancellationController::class, 'execute'])->name('execute');
         });
+
+        // Maintenance Requests
+        Route::prefix('maintenance')->name('maintenance.')->group(function () {
+            Route::get('/',              [ReceptionistMaintenanceController::class, 'index'])->name('index');
+            Route::post('/',             [ReceptionistMaintenanceController::class, 'store'])->name('store');
+            Route::patch('/{maintenanceRequest}/status', [ReceptionistMaintenanceController::class, 'updateStatus'])->name('status');
+            Route::delete('/{maintenanceRequest}', [ReceptionistMaintenanceController::class, 'destroy'])->name('destroy');
+        });
+
+        // Guest Messaging
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/',              [ReceptionistMessageController::class, 'index'])->name('index');
+            Route::get('/{booking}',     [ReceptionistMessageController::class, 'show'])->name('show');
+            Route::post('/{booking}',    [ReceptionistMessageController::class, 'store'])->name('store');
+        });
+
+        // Digital Check-ins
+        Route::prefix('checkins')->name('checkins.')->group(function () {
+            Route::get('/',                            [ReceptionistCheckinController::class, 'index'])->name('index');
+            Route::post('/{checkin}/verify',           [ReceptionistCheckinController::class, 'verify'])->name('verify');
+        });
+
+        // My Shifts
+        Route::get('/shifts', [ReceptionistShiftController::class, 'index'])->name('shifts.index');
     });
 
     // ── Hotel Staff (accountant) ──────────────────────────────────────────────

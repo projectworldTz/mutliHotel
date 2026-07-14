@@ -132,7 +132,12 @@ enum Feature: string
             self::AI_CONCIERGE,
             self::EMAIL_MARKETING,
             self::UPSELLING,
-            self::GUEST_SURVEYS => true,
+            self::GUEST_SURVEYS,
+            self::MAINTENANCE_REQUESTS,
+            self::GUEST_MESSAGING,
+            self::DIGITAL_CHECKIN,
+            self::STAFF_SCHEDULING,
+            self::GROUP_BOOKING => true,
             default             => false,
         };
     }

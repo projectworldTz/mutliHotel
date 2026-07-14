@@ -269,6 +269,99 @@
         </div>
         @endif
 
+        {{-- Digital Check-in --}}
+        @if($booking->hotel->hasFeature('digital_checkin') && in_array($booking->status, ['pending', 'confirmed']))
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-5">
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-1">{{ __('Digital Check-in') }}</h3>
+            @if($booking->digitalCheckin?->isVerified())
+            <p class="text-sm text-emerald-600 dark:text-emerald-400">{{ __('Your check-in has been verified by the hotel. See you soon!') }}</p>
+            @else
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">{{ __('Save time at the front desk — submit your arrival details ahead of time.') }}</p>
+            @if($booking->digitalCheckin)
+            <p class="text-xs text-amber-600 dark:text-amber-400 mb-3">{{ __('Submitted — awaiting hotel verification. You can still update it below.') }}</p>
+            @endif
+            <form method="POST" action="{{ route('booking.checkin.store', $booking->booking_number) }}" enctype="multipart/form-data" class="space-y-3">
+                @csrf
+                <div>
+                    <label class="form-label">{{ __('Estimated Arrival Time') }}</label>
+                    <input type="time" name="estimated_arrival_time" value="{{ old('estimated_arrival_time', $booking->digitalCheckin?->estimated_arrival_time) }}" required class="form-input">
+                </div>
+                <div>
+                    <label class="form-label">{{ __('Preferences') }} <span class="font-normal text-slate-400">({{ __('optional') }})</span></label>
+                    <textarea name="preferences" rows="2" class="form-input" placeholder="{{ __('e.g. high floor, extra pillows…') }}">{{ old('preferences', $booking->digitalCheckin?->preferences) }}</textarea>
+                </div>
+                <div>
+                    <label class="form-label">{{ __('ID Document') }} <span class="font-normal text-slate-400">({{ __('optional, JPG/PNG/PDF, max 5MB') }})</span></label>
+                    <input type="file" name="id_document" accept=".jpg,.jpeg,.png,.pdf" class="form-input">
+                </div>
+                <button type="submit" class="btn-primary btn-sm">{{ __('Submit Check-in') }}</button>
+            </form>
+            @endif
+        </div>
+        @endif
+
+        {{-- Maintenance / Report an Issue --}}
+        @if($booking->hotel->hasFeature('maintenance_requests') && in_array($booking->status, ['confirmed', 'checked_in']))
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-5">
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-1">{{ __('Report an Issue') }}</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">{{ __('Something not working in your room? Let us know and we\'ll take care of it.') }}</p>
+
+            @if($booking->maintenanceRequests->isNotEmpty())
+            @php
+                $mrStatusColors = ['pending' => 'text-amber-600 dark:text-amber-400', 'in_progress' => 'text-blue-600 dark:text-blue-400', 'resolved' => 'text-emerald-600 dark:text-emerald-400'];
+            @endphp
+            <div class="space-y-2 mb-3">
+                @foreach($booking->maintenanceRequests as $mr)
+                <div class="flex items-center justify-between text-sm rounded-lg bg-slate-50 dark:bg-slate-700/50 px-3 py-2">
+                    <span class="text-slate-700 dark:text-slate-200">{{ $mr->description }}</span>
+                    <span class="text-xs font-semibold {{ $mrStatusColors[$mr->status] ?? '' }}">{{ ucwords(str_replace('_',' ',$mr->status)) }}</span>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            <form method="POST" action="{{ route('booking.maintenance.store', $booking->booking_number) }}" class="flex flex-wrap gap-2">
+                @csrf
+                <select name="category" required class="form-input w-auto text-sm">
+                    <option value="plumbing">{{ __('Plumbing') }}</option>
+                    <option value="electrical">{{ __('Electrical') }}</option>
+                    <option value="hvac">{{ __('HVAC') }}</option>
+                    <option value="furniture">{{ __('Furniture') }}</option>
+                    <option value="appliance">{{ __('Appliance') }}</option>
+                    <option value="other">{{ __('Other') }}</option>
+                </select>
+                <input type="text" name="description" required maxlength="1000" placeholder="{{ __('Describe the issue…') }}" class="form-input flex-1 min-w-[160px] text-sm">
+                <button type="submit" class="btn-primary btn-sm">{{ __('Submit') }}</button>
+            </form>
+        </div>
+        @endif
+
+        {{-- Guest Messaging --}}
+        @if($booking->hotel->hasFeature('guest_messaging') && in_array($booking->status, ['confirmed', 'checked_in']))
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-5">
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-3">{{ __('Message the Front Desk') }}</h3>
+
+            <div class="space-y-2 max-h-64 overflow-y-auto mb-3">
+                @forelse($booking->messages->sortBy('created_at') as $msg)
+                <div class="flex {{ $msg->sender_type === 'guest' ? 'justify-end' : 'justify-start' }}">
+                    <div class="max-w-[80%] rounded-2xl px-3 py-2 text-sm {{ $msg->sender_type === 'guest' ? 'bg-navy text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100' }}">
+                        <p>{{ $msg->message }}</p>
+                        <p class="mt-0.5 text-[10px] opacity-60">{{ $msg->created_at->format('d M, H:i') }}</p>
+                    </div>
+                </div>
+                @empty
+                <p class="text-sm text-slate-400 text-center py-3">{{ __('No messages yet — say hello!') }}</p>
+                @endforelse
+            </div>
+
+            <form method="POST" action="{{ route('booking.messages.store', $booking->booking_number) }}" class="flex gap-2">
+                @csrf
+                <input type="text" name="message" required maxlength="1000" placeholder="{{ __('Type a message…') }}" class="form-input flex-1 text-sm">
+                <button type="submit" class="btn-primary btn-sm">{{ __('Send') }}</button>
+            </form>
+        </div>
+        @endif
+
         {{-- Actions --}}
         <div class="flex flex-wrap gap-3">
             <a href="{{ route('booking.invoice', $booking->booking_number) }}"

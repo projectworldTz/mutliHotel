@@ -91,6 +91,21 @@ class Booking extends Model
         return $this->hasMany(BookingMealPackage::class);
     }
 
+    public function maintenanceRequests()
+    {
+        return $this->hasMany(MaintenanceRequest::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(GuestMessage::class);
+    }
+
+    public function digitalCheckin()
+    {
+        return $this->hasOne(DigitalCheckin::class);
+    }
+
     public function payment()
     {
         return $this->hasOne(Payment::class);
