@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Enums\Feature;
 use App\Models\Booking;
 use App\Services\CancellationService;
+use App\Models\BookingMealPackage;
 use App\Models\BookingRoom;
 use App\Models\Hotel;
 use App\Models\HousekeepingTask;
+use App\Models\MealPackage;
 use App\Models\Payment;
 use App\Models\ReservationCart;
 use App\Models\ReservationCartItem;
@@ -146,31 +148,81 @@ class BookingService
         }
 
         return DB::transaction(function () use ($user, $cart, $checkoutData) {
-            // 1. Pessimistic-lock each room row, then verify availability.
-            //    lockForUpdate() holds a row-level write lock for the duration
-            //    of the transaction, so two concurrent checkouts for the same
-            //    room cannot both pass the availability check.
-            foreach ($cart->items as $item) {
-                $room = Room::where('id', $item->room_id)->lockForUpdate()->firstOrFail();
+            $hotel = $cart->items->first()->room->hotel;
+            $upsellingEnabled = $hotel->hasFeature(Feature::UPSELLING);
+            $upgradeSelections = $upsellingEnabled ? ($checkoutData['upgrades'] ?? []) : [];
 
-                if (! $room->isAvailableForDates($item->check_in, $item->check_out)) {
-                    throw new \RuntimeException(
-                        "Sorry, {$room->room_number} is no longer available for your selected dates — " .
-                        "someone else just booked it. Please choose different dates or another room."
-                    );
+            // 1. Pessimistic-lock each room row (or its selected upgrade room),
+            //    then verify availability. lockForUpdate() holds a row-level
+            //    write lock for the duration of the transaction, so two
+            //    concurrent checkouts for the same room cannot both pass the
+            //    availability check.
+            $bookingItems = [];
+            foreach ($cart->items as $item) {
+                $resolved = $this->resolveUpgrade($item, $upgradeSelections[$item->id] ?? null, $hotel);
+
+                if (! $resolved) {
+                    $room = Room::where('id', $item->room_id)->lockForUpdate()->firstOrFail();
+
+                    if (! $room->isAvailableForDates($item->check_in, $item->check_out)) {
+                        throw new \RuntimeException(
+                            "Sorry, {$room->room_number} is no longer available for your selected dates — " .
+                            "someone else just booked it. Please choose different dates or another room."
+                        );
+                    }
+                    $item->refreshPricing();
+
+                    $resolved = [
+                        'room'         => $room,
+                        'room_type_id' => $item->room_type_id,
+                        'check_in'     => $item->check_in,
+                        'check_out'    => $item->check_out,
+                        'nightly_rate' => $item->nightly_rate,
+                        'nights'       => $item->nights,
+                        'sub_total'    => (float) $item->sub_total,
+                    ];
                 }
-                $item->refreshPricing();
+
+                $bookingItems[] = $resolved;
             }
 
             // 2. Calculate totals
-            $subtotal  = (float) $cart->items->sum('sub_total');
-            $hotel     = $cart->items->first()->room->hotel;
-            $totals    = $this->pricingService->calculateOrderTotal($subtotal);
+            $subtotal = array_sum(array_column($bookingItems, 'sub_total'));
 
             // 4. Determine overall check-in/out (may span multiple room items)
             $checkIn  = $cart->items->min('check_in');
             $checkOut = $cart->items->max('check_out');
             $nights   = Carbon::parse($checkIn)->diffInDays(Carbon::parse($checkOut));
+
+            // 4b. Resolve selected meal packages and compute their total —
+            // add-ons are part of the Upselling Engine, so only honor a
+            // selection if the hotel actually has that feature.
+            $guests = ($checkoutData['guests_adults'] ?? 1) + ($checkoutData['guests_children'] ?? 0);
+            $selectedPackageIds = $upsellingEnabled
+                ? array_keys(array_filter($checkoutData['meal_packages'] ?? []))
+                : [];
+            $selectedPackages = MealPackage::forHotel($hotel->id)->active()
+                ->whereIn('id', $selectedPackageIds)
+                ->get();
+
+            $addonsTotal = 0.0;
+            $packageLines = [];
+            foreach ($selectedPackages as $package) {
+                $quantity   = $package->calculateQuantity($nights, $guests);
+                $lineSubtotal = (float) $package->price * $quantity;
+                $addonsTotal += $lineSubtotal;
+
+                $packageLines[] = [
+                    'meal_package_id' => $package->id,
+                    'name'            => $package->name,
+                    'pricing_type'    => $package->pricing_type,
+                    'unit_price'      => $package->price,
+                    'quantity'        => $quantity,
+                    'sub_total'       => $lineSubtotal,
+                ];
+            }
+
+            $totals = $this->pricingService->calculateOrderTotal($subtotal, $addonsTotal);
 
             // 5. Resolve corporate account from session (set when adding from portal)
             $corporateAccountId = session('corporate_account_id');
@@ -197,6 +249,7 @@ class BookingService
                 'guests_adults'                => $checkoutData['guests_adults'] ?? 1,
                 'guests_children'              => $checkoutData['guests_children'] ?? 0,
                 'sub_total'                    => $totals['subtotal'],
+                'addons_total'                 => $totals['addons_total'],
                 'tax_total'                    => $totals['tax_total'],
                 'tax_rate'                     => $totals['tax_rate'],
                 'discount_total'               => $totals['discount_total'],
@@ -206,20 +259,26 @@ class BookingService
                 'cancellation_policy_snapshot' => json_encode($this->cancellationService->policySnapshot()),
             ]);
 
-            // 7. Create BookingRoom records and block dates
-            foreach ($cart->items as $item) {
+            // 7. Create BookingRoom records and block dates (using the resolved
+            //    room — the originally-carted one, or an upgrade if selected).
+            foreach ($bookingItems as $bi) {
                 BookingRoom::create([
                     'booking_id'   => $booking->id,
-                    'room_id'      => $item->room_id,
-                    'room_type_id' => $item->room_type_id,
-                    'check_in'     => $item->check_in,
-                    'check_out'    => $item->check_out,
-                    'nightly_rate' => $item->nightly_rate,
-                    'nights'       => $item->nights,
-                    'sub_total'    => $item->sub_total,
+                    'room_id'      => $bi['room']->id,
+                    'room_type_id' => $bi['room_type_id'],
+                    'check_in'     => $bi['check_in'],
+                    'check_out'    => $bi['check_out'],
+                    'nightly_rate' => $bi['nightly_rate'],
+                    'nights'       => $bi['nights'],
+                    'sub_total'    => $bi['sub_total'],
                 ]);
 
-                $this->availabilityRepository->blockForBooking($item->room, $booking);
+                $this->availabilityRepository->blockForBooking($bi['room'], $booking);
+            }
+
+            // 7b. Create the selected meal package line items
+            foreach ($packageLines as $line) {
+                BookingMealPackage::create($line + ['booking_id' => $booking->id]);
             }
 
             // 7. Create the invoice
@@ -230,8 +289,52 @@ class BookingService
             $cart->delete();
             session()->forget('corporate_account_id');
 
-            return $booking->fresh(['rooms.room', 'rooms.roomType', 'hotel', 'invoice']);
+            return $booking->fresh(['rooms.room', 'rooms.roomType', 'hotel', 'invoice', 'mealPackages']);
         });
+    }
+
+    /**
+     * If the guest selected a room upgrade for this cart item, try to lock an
+     * available room of the requested (higher-priced) type for the same stay
+     * window and price it fresh. Returns null if no upgrade was requested, the
+     * candidate type is invalid, or nothing is available — the caller then
+     * falls back to the originally-carted room.
+     */
+    private function resolveUpgrade(ReservationCartItem $item, ?int $upgradeRoomTypeId, Hotel $hotel): ?array
+    {
+        if (! $upgradeRoomTypeId) {
+            return null;
+        }
+
+        $candidateType = RoomType::where('id', $upgradeRoomTypeId)
+            ->where('hotel_id', $hotel->id)
+            ->active()
+            ->first();
+
+        if (! $candidateType || (float) $candidateType->base_price <= (float) $item->roomType->base_price) {
+            return null;
+        }
+
+        $candidateRoom = Room::where('room_type_id', $candidateType->id)
+            ->lockForUpdate()
+            ->get()
+            ->first(fn ($r) => $r->isAvailableForDates($item->check_in, $item->check_out));
+
+        if (! $candidateRoom) {
+            return null;
+        }
+
+        $pricing = $this->pricingService->calculateForStay($candidateType, $item->check_in, $item->check_out);
+
+        return [
+            'room'         => $candidateRoom,
+            'room_type_id' => $candidateType->id,
+            'check_in'     => $item->check_in,
+            'check_out'    => $item->check_out,
+            'nightly_rate' => $pricing['nightly_rate'],
+            'nights'       => $pricing['nights'],
+            'sub_total'    => $pricing['subtotal'],
+        ];
     }
 
     // ── Status transitions ────────────────────────────────────────────────────
@@ -294,6 +397,8 @@ class BookingService
                 ]);
             }
         }
+
+        event(new \App\Events\BookingCheckedOut($booking));
 
         return $booking;
     }

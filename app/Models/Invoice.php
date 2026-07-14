@@ -11,15 +11,16 @@ class Invoice extends Model
 
     protected $fillable = [
         'booking_id', 'invoice_number',
-        'subtotal', 'tax_total', 'discount_total', 'grand_total',
+        'subtotal', 'addons_total', 'tax_total', 'discount_total', 'grand_total',
         'cancellation_deduction', 'refund_amount', 'deduction_percentage',
         'currency', 'status',
-        'issued_at', 'due_at', 'paid_at', 'cancelled_at',
+        'issued_at', 'due_at', 'paid_at', 'cancelled_at', 'refunded_at',
         'notes',
     ];
 
     protected $casts = [
         'subtotal'               => 'decimal:2',
+        'addons_total'           => 'decimal:2',
         'tax_total'              => 'decimal:2',
         'discount_total'         => 'decimal:2',
         'grand_total'            => 'decimal:2',
@@ -30,6 +31,7 @@ class Invoice extends Model
         'due_at'                 => 'datetime',
         'paid_at'                => 'datetime',
         'cancelled_at'           => 'datetime',
+        'refunded_at'            => 'datetime',
     ];
 
     public function isCancelled(): bool { return $this->status === 'cancelled'; }
@@ -49,12 +51,18 @@ class Invoice extends Model
         return $query->where('status', 'paid');
     }
 
+    public function scopeRefunded($query)
+    {
+        return $query->where('status', 'refunded');
+    }
+
     public function getStatusBadgeAttribute(): array
     {
         return match ($this->status) {
             'issued'    => ['label' => 'Issued',    'color' => 'blue'],
             'paid'      => ['label' => 'Paid',      'color' => 'green'],
             'cancelled' => ['label' => 'Cancelled', 'color' => 'red'],
+            'refunded'  => ['label' => 'Refunded',  'color' => 'purple'],
             default     => ['label' => 'Draft',     'color' => 'gray'],
         };
     }

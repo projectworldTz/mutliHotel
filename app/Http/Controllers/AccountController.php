@@ -61,6 +61,7 @@ class AccountController extends Controller
             'name'  => 'required|string|max:255',
             'phone' => 'nullable|string|max:30',
             'email' => 'required|email|unique:users,email,' . $user->id,
+            'marketing_opt_in' => 'required|boolean',
         ]);
 
         $user->update($data);

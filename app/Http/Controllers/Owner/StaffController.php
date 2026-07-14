@@ -35,7 +35,7 @@ class StaffController extends Controller
         $data = $request->validate([
             'email'    => 'required|email|max:255',
             'name'     => 'required_without:existing_user|string|max:255',
-            'position' => 'required|in:receptionist,manager,cashier',
+            'position' => 'required|in:receptionist,manager,cashier,accountant',
         ]);
 
         // Find or create the user — track whether this is a brand-new account

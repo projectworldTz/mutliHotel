@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Invoice;
+use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
@@ -25,6 +26,7 @@ class InvoiceService
                 'booking_id'     => $booking->id,
                 'invoice_number' => Invoice::generateInvoiceNumber(),
                 'subtotal'       => $booking->sub_total,
+                'addons_total'   => $booking->addons_total,
                 'tax_total'      => $booking->tax_total,
                 'discount_total' => $booking->discount_total,
                 'grand_total'    => $booking->grand_total,
@@ -49,7 +51,9 @@ class InvoiceService
     }
 
     /**
-     * Mark the invoice as paid.
+     * Mark the invoice as paid, and flip the linked Payment record to match
+     * (shared by the booking-confirmation flow and the accountant's manual
+     * "mark paid" action so both keep Payment/Invoice in sync the same way).
      */
     public function markPaid(Invoice $invoice): Invoice
     {
@@ -57,6 +61,33 @@ class InvoiceService
             'status'  => 'paid',
             'paid_at' => now(),
         ]);
+
+        Payment::where('booking_id', $invoice->booking_id)
+            ->where('status', 'pending')
+            ->latest()
+            ->first()
+            ?->update(['status' => 'paid']);
+
+        return $invoice;
+    }
+
+    /**
+     * Issue a manual refund against an invoice (accountant-initiated, independent
+     * of the guest-facing cancellation-refund flow in CancellationService).
+     */
+    public function refund(Invoice $invoice, float $amount, ?string $reason = null): Invoice
+    {
+        $invoice->update([
+            'status'         => 'refunded',
+            'refund_amount'  => $amount,
+            'refunded_at'    => now(),
+            'notes'          => trim(($invoice->notes ? $invoice->notes . "\n" : '') . ($reason ? "Refund reason: {$reason}" : '')),
+        ]);
+
+        Payment::where('booking_id', $invoice->booking_id)
+            ->latest()
+            ->first()
+            ?->update(['status' => 'refunded', 'refund_amount' => $amount]);
 
         return $invoice;
     }
@@ -67,7 +98,7 @@ class InvoiceService
      */
     public function toPdf(Invoice $invoice): string
     {
-        $invoice->loadMissing(['booking.hotel', 'booking.user', 'booking.rooms.roomType']);
+        $invoice->loadMissing(['booking.hotel', 'booking.user', 'booking.rooms.roomType', 'booking.mealPackages']);
 
         $pdf = Pdf::loadView('pdf.invoice', [
                 'invoice' => $invoice,

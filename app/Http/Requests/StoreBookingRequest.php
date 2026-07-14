@@ -31,6 +31,10 @@ class StoreBookingRequest extends FormRequest
             'guests_children'  => ['integer', 'min:0', 'max:10'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
             'agree_terms'      => ['required', 'accepted'],
+            'meal_packages'    => ['nullable', 'array'],
+            'meal_packages.*'  => ['nullable', 'boolean'],
+            'upgrades'         => ['nullable', 'array'],
+            'upgrades.*'       => ['nullable', 'integer', 'exists:room_types,id'],
         ];
 
         if ($this->resolvedHotel()?->manual_payment_enabled) {

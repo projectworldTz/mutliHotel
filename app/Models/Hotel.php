@@ -111,6 +111,11 @@ class Hotel extends Model
         return $this->hasMany(RoomType::class);
     }
 
+    public function mealPackages()
+    {
+        return $this->hasMany(MealPackage::class);
+    }
+
     public function rooms()
     {
         return $this->hasMany(Room::class);

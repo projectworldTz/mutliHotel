@@ -39,6 +39,14 @@ use App\Http\Controllers\Receptionist\HousekeepingController as ReceptionistHous
 use App\Http\Controllers\Receptionist\InventoryController as ReceptionistInventoryController;
 use App\Http\Controllers\Receptionist\CancellationApprovalController as ReceptionistCancellationController;
 use App\Http\Controllers\Owner\CancellationApprovalController as OwnerCancellationController;
+use App\Http\Controllers\Owner\MealPackageController as OwnerMealPackageController;
+use App\Http\Controllers\Owner\CampaignController as OwnerCampaignController;
+use App\Http\Controllers\Owner\SurveyController as OwnerSurveyController;
+use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\Accountant\DashboardController as AccountantDashboard;
+use App\Http\Controllers\Accountant\InvoiceController as AccountantInvoiceController;
+use App\Http\Controllers\Accountant\ReportController as AccountantReportController;
+use App\Http\Controllers\Accountant\ExpenseController as AccountantExpenseController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -89,6 +97,10 @@ Route::prefix('hotels')->name('hotels.')->group(function () {
 // ── Corporate / B2B Portal (public — access via unique code) ─────────────────
 Route::get('/corporate/{hotel:slug}/{code}', [CorporatePortalController::class, 'show'])
     ->name('corporate.portal');
+
+// ── Guest Satisfaction Survey (public — access via emailed token link) ───────
+Route::get('/survey/{token}', [SurveyController::class, 'show'])->name('survey.show');
+Route::post('/survey/{token}', [SurveyController::class, 'store'])->name('survey.store');
 
 // ── Authenticated customers ───────────────────────────────────────────────────
 Route::middleware('auth')->group(function () {
@@ -319,6 +331,29 @@ Route::middleware('auth')->group(function () {
             Route::delete('/categories/{category}', [OwnerInventoryController::class, 'destroyCategory'])->name('categories.destroy');
         });
 
+        // Meal Packages
+        Route::prefix('hotels/{hotel}/meal-packages')->name('meal-packages.')->group(function () {
+            Route::get('/',                  [OwnerMealPackageController::class, 'index'])->name('index');
+            Route::post('/',                 [OwnerMealPackageController::class, 'store'])->name('store');
+            Route::put('/{mealPackage}',      [OwnerMealPackageController::class, 'update'])->name('update');
+            Route::delete('/{mealPackage}',   [OwnerMealPackageController::class, 'destroy'])->name('destroy');
+        });
+
+        // Email Marketing Campaigns
+        Route::prefix('hotels/{hotel}/campaigns')->name('campaigns.')->group(function () {
+            Route::get('/',              [OwnerCampaignController::class, 'index'])->name('index');
+            Route::get('/create',        [OwnerCampaignController::class, 'create'])->name('create');
+            Route::post('/',             [OwnerCampaignController::class, 'store'])->name('store');
+            Route::get('/{campaign}',    [OwnerCampaignController::class, 'show'])->name('show');
+            Route::post('/{campaign}/send', [OwnerCampaignController::class, 'send'])->name('send');
+            Route::delete('/{campaign}', [OwnerCampaignController::class, 'destroy'])->name('destroy');
+        });
+
+        // Guest Satisfaction Surveys
+        Route::prefix('hotels/{hotel}/surveys')->name('surveys.')->group(function () {
+            Route::get('/', [OwnerSurveyController::class, 'index'])->name('index');
+        });
+
         // Premium Feature Requests
         Route::prefix('hotels/{hotel}/features')->name('hotels.features.')->group(function () {
             Route::get('/',  [OwnerFeatureRequestController::class, 'index'])->name('index');
@@ -390,6 +425,27 @@ Route::middleware('auth')->group(function () {
             Route::get('/',                                      [ReceptionistCancellationController::class, 'index'])->name('index');
             Route::post('/bookings/{booking}/request',           [ReceptionistCancellationController::class, 'request'])->name('request');
             Route::post('/{approval}/execute',                   [ReceptionistCancellationController::class, 'execute'])->name('execute');
+        });
+    });
+
+    // ── Hotel Staff (accountant) ──────────────────────────────────────────────
+    Route::middleware(['auth', 'hotel.staff:accountant'])->prefix('accountant')->name('accountant.')->group(function () {
+        Route::get('/', [AccountantDashboard::class, 'index'])->name('dashboard');
+
+        Route::prefix('invoices')->name('invoices.')->group(function () {
+            Route::get('/', [AccountantInvoiceController::class, 'index'])->name('index');
+            Route::get('/{invoice}', [AccountantInvoiceController::class, 'show'])->name('show');
+            Route::post('/{invoice}/mark-paid', [AccountantInvoiceController::class, 'markPaid'])->name('mark-paid');
+            Route::post('/{invoice}/refund', [AccountantInvoiceController::class, 'refund'])->name('refund');
+        });
+
+        Route::get('/reports', [AccountantReportController::class, 'index'])->name('reports.index');
+
+        Route::prefix('expenses')->name('expenses.')->group(function () {
+            Route::get('/', [AccountantExpenseController::class, 'index'])->name('index');
+            Route::post('/', [AccountantExpenseController::class, 'store'])->name('store');
+            Route::put('/{expense}', [AccountantExpenseController::class, 'update'])->name('update');
+            Route::delete('/{expense}', [AccountantExpenseController::class, 'destroy'])->name('destroy');
         });
     });
 });

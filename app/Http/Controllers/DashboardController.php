@@ -15,6 +15,7 @@ class DashboardController extends Controller
             $user->isSuperAdmin()                                  => redirect()->route('admin.dashboard'),
             $user->isHotelOwner()                                  => redirect()->route('owner.dashboard'),
             $user->hasAnyRole(['receptionist', 'manager', 'cashier']) => redirect()->route('receptionist.dashboard'),
+            $user->isAccountant()                                  => redirect()->route('accountant.dashboard'),
             default                                                => redirect()->route('account.bookings'),
         };
     }

@@ -63,6 +63,36 @@
                 {{ __('Staff') }}
             </a>
 
+            @if($myHotel->hasFeature('upselling'))
+            <a href="{{ route('owner.meal-packages.index', $myHotel) }}"
+               class="{{ str_starts_with($route ?? '', 'owner.meal-packages') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21M8.25 8.25h7.5v7.5h-7.5v-7.5z"/>
+                </svg>
+                {{ __('Meal Packages & Upsells') }}
+            </a>
+            @endif
+
+            @if($myHotel->hasFeature('email_marketing'))
+            <a href="{{ route('owner.campaigns.index', $myHotel) }}"
+               class="{{ str_starts_with($route ?? '', 'owner.campaigns') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                {{ __('Email Marketing') }}
+            </a>
+            @endif
+
+            @if($myHotel->hasFeature('guest_surveys'))
+            <a href="{{ route('owner.surveys.index', $myHotel) }}"
+               class="{{ str_starts_with($route ?? '', 'owner.surveys') ? 'nav-link-active' : 'nav-link' }}">
+                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                {{ __('Guest Surveys') }}
+            </a>
+            @endif
+
             @if($myHotel->hasFeature('advanced_analytics'))
             <a href="{{ route('owner.analytics.index', $myHotel) }}"
                class="{{ str_starts_with($route ?? '', 'owner.analytics') ? 'nav-link-active' : 'nav-link' }}">

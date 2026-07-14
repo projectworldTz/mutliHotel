@@ -59,7 +59,7 @@ class BookingController extends Controller
         $hotel = $request->attributes->get('assigned_hotel');
         abort_if($booking->hotel_id !== $hotel->id, 403);
 
-        $booking->loadMissing(['user', 'rooms.roomType', 'hotel', 'payment', 'invoice']);
+        $booking->loadMissing(['user', 'rooms.roomType', 'hotel', 'payment', 'invoice', 'mealPackages']);
 
         return view('receptionist.bookings.show', compact('hotel', 'booking'));
     }
@@ -240,7 +240,7 @@ class BookingController extends Controller
         $hotel = $request->attributes->get('assigned_hotel');
         abort_if($booking->hotel_id !== $hotel->id, 403);
 
-        $booking->loadMissing(['user', 'rooms.roomType', 'rooms.room', 'hotel', 'payment', 'invoice', 'cancellationApproval']);
+        $booking->loadMissing(['user', 'rooms.roomType', 'rooms.room', 'hotel', 'payment', 'invoice', 'cancellationApproval', 'mealPackages']);
 
         $invoice = $booking->invoice;
 

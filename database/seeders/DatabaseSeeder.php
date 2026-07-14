@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         Role::firstOrCreate(['name' => 'receptionist'], ['guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'manager'],      ['guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'cashier'],      ['guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'accountant'],   ['guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'customer'],     ['guard_name' => 'web']);
 
         // ── Permissions ───────────────────────────────────────────────────────

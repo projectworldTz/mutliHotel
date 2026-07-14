@@ -151,12 +151,31 @@
             @endforeach
         </div>
 
+        {{-- Meal Packages & Add-ons --}}
+        @if($booking->mealPackages->isNotEmpty())
+        <div class="space-y-2 mb-5">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ __('Meal Packages & Add-ons') }}</p>
+            @foreach($booking->mealPackages as $mp)
+            <div class="flex justify-between text-sm text-slate-600 dark:text-slate-300">
+                <span>{{ $mp->name }} @if($mp->quantity > 1) × {{ $mp->quantity }} @endif</span>
+                <span>{{ money($mp->sub_total) }}</span>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
         {{-- Totals --}}
         <div class="border-t border-slate-100 dark:border-slate-700 pt-4 space-y-1.5 text-sm mb-5">
             <div class="flex justify-between text-slate-600 dark:text-slate-300">
                 <span>{{ __('Subtotal') }}</span>
                 <span>{{ money($booking->sub_total ?? 0) }}</span>
             </div>
+            @if(($booking->addons_total ?? 0) > 0)
+            <div class="flex justify-between text-slate-600 dark:text-slate-300">
+                <span>{{ __('Add-ons') }}</span>
+                <span>{{ money($booking->addons_total) }}</span>
+            </div>
+            @endif
             @if(($booking->discount_total ?? 0) > 0)
             <div class="flex justify-between text-emerald-600 dark:text-emerald-400">
                 <span>{{ __('Discount') }}</span>

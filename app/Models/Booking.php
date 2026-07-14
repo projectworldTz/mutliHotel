@@ -21,6 +21,7 @@ class Booking extends Model
         'guests_adults',
         'guests_children',
         'sub_total',
+        'addons_total',
         'tax_total',
         'tax_rate',
         'discount_total',
@@ -43,6 +44,7 @@ class Booking extends Model
         'guests_adults'    => 'integer',
         'guests_children'  => 'integer',
         'sub_total'        => 'decimal:2',
+        'addons_total'     => 'decimal:2',
         'tax_total'        => 'decimal:2',
         'tax_rate'         => 'decimal:2',
         'discount_total'   => 'decimal:2',
@@ -82,6 +84,11 @@ class Booking extends Model
     public function rooms()
     {
         return $this->hasMany(BookingRoom::class);
+    }
+
+    public function mealPackages()
+    {
+        return $this->hasMany(BookingMealPackage::class);
     }
 
     public function payment()
@@ -140,6 +147,11 @@ class Booking extends Model
     {
         return $query->whereIn('status', [self::STATUS_PENDING, self::STATUS_CONFIRMED])
                      ->where('check_in', '>=', now()->toDateString());
+    }
+
+    public function scopePastGuests($query)
+    {
+        return $query->where('status', self::STATUS_CHECKED_OUT);
     }
 
     // ── Accessors ─────────────────────────────────────────────────────────────

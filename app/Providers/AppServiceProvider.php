@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Events\BookingCancelled;
+use App\Events\BookingCheckedOut;
 use App\Events\BookingCreated;
 use App\Events\HotelSubmitted;
 use App\Listeners\SendBookingCancellationEmail;
 use App\Listeners\SendBookingConfirmationEmail;
+use App\Listeners\SendGuestSurveyEmail;
 use App\Listeners\SendHotelSubmittedNotification;
 use App\Models\Hotel;
 use App\Models\User;
@@ -101,9 +103,10 @@ class AppServiceProvider extends ServiceProvider
         );
 
         // ── Event → Listener wiring ───────────────────────────────────────────
-        Event::listen(BookingCreated::class,   SendBookingConfirmationEmail::class);
-        Event::listen(BookingCancelled::class, SendBookingCancellationEmail::class);
-        Event::listen(HotelSubmitted::class,   SendHotelSubmittedNotification::class);
+        Event::listen(BookingCreated::class,    SendBookingConfirmationEmail::class);
+        Event::listen(BookingCancelled::class,  SendBookingCancellationEmail::class);
+        Event::listen(HotelSubmitted::class,    SendHotelSubmittedNotification::class);
+        Event::listen(BookingCheckedOut::class, SendGuestSurveyEmail::class);
 
     }
 }

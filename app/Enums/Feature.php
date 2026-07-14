@@ -129,8 +129,11 @@ enum Feature: string
             self::ADVANCED_ANALYTICS,
             self::INVENTORY_MANAGEMENT,
             self::CORPORATE_PORTAL,
-            self::AI_CONCIERGE => true,
-            default            => false,
+            self::AI_CONCIERGE,
+            self::EMAIL_MARKETING,
+            self::UPSELLING,
+            self::GUEST_SURVEYS => true,
+            default             => false,
         };
     }
 

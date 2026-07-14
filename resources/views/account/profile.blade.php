@@ -32,6 +32,17 @@
                                class="form-input" placeholder="+1 555 000 0000">
                     </div>
                 </div>
+
+                <div class="mt-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="hidden" name="marketing_opt_in" value="0">
+                        <input type="checkbox" name="marketing_opt_in" value="1"
+                            {{ old('marketing_opt_in', auth()->user()->marketing_opt_in) ? 'checked' : '' }}
+                            class="rounded accent-navy">
+                        <span class="text-sm text-slate-700 dark:text-slate-200">{{ __('Send me promotions, offers, and news from hotels I\'ve stayed at or booked with') }}</span>
+                    </label>
+                </div>
+
                 <button type="submit" class="btn-primary mt-5">{{ __('Save Changes') }}</button>
             </form>
         </div>

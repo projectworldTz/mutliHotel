@@ -51,6 +51,75 @@
                     </div>
                 </div>
 
+                {{-- Room Upgrades --}}
+                @if(!empty($upgradeOptions))
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">{{ __('Room Upgrades') }}</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ __('A better room is available for your dates — upgrade for the price difference per night.') }}</p>
+
+                    <div class="space-y-4">
+                        @foreach($cart->items as $item)
+                        @continue(empty($upgradeOptions[$item->id]))
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-2">{{ $item->roomType->name ?? __('Room') }}</p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-3 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600">
+                                    <input type="radio" name="upgrades[{{ $item->id }}]" value="" checked class="text-navy">
+                                    <span class="text-sm text-slate-700 dark:text-slate-200">{{ __('Keep my selected room') }}</span>
+                                </label>
+                                @foreach($upgradeOptions[$item->id] as $option)
+                                <label class="flex items-center justify-between gap-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-3 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600">
+                                    <span class="flex items-center gap-3">
+                                        <input type="radio" name="upgrades[{{ $item->id }}]" value="{{ $option['room_type_id'] }}" class="text-navy">
+                                        <span class="text-sm text-slate-700 dark:text-slate-200">{{ __('Upgrade to') }} {{ $option['name'] }}</span>
+                                    </span>
+                                    <span class="text-sm font-semibold text-navy dark:text-gold shrink-0">+{{ money($option['nightly_diff']) }} {{ __('/ night') }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- Meal Packages & Add-ons --}}
+                @if($mealPackages->isNotEmpty())
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">{{ __('Meal Packages & Add-ons') }}</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ __('Optional extras for your stay — charged in addition to your room total.') }}</p>
+
+                    @php
+                        $pricingHints = [
+                            'per_night' => __('per night'),
+                            'per_stay'  => __('flat, one-time'),
+                            'per_guest' => __('per guest'),
+                        ];
+                    @endphp
+
+                    <div class="space-y-2">
+                        @foreach($mealPackages as $package)
+                        <label class="flex items-start gap-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-3.5 cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+                            <input type="checkbox" name="meal_packages[{{ $package->id }}]" value="1"
+                                   {{ old('meal_packages.' . $package->id) ? 'checked' : '' }}
+                                   class="mt-0.5 rounded border-slate-300 text-navy">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white">{{ $package->name }}</p>
+                                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 shrink-0">
+                                        {{ money($package->price) }} <span class="font-normal text-slate-400">/ {{ $pricingHints[$package->pricing_type] ?? '' }}</span>
+                                    </p>
+                                </div>
+                                @if($package->description)
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ $package->description }}</p>
+                                @endif
+                            </div>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 {{-- Payment Method --}}
                 <div class="card p-6">
                     <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-1">{{ __('Payment Method') }}</h2>

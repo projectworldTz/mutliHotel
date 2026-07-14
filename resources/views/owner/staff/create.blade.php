@@ -34,6 +34,7 @@
                 <select name="position" class="form-select" required>
                     <option value="receptionist" {{ old('position') === 'receptionist' ? 'selected' : '' }}>{{ __('Receptionist') }}</option>
                     <option value="manager" {{ old('position') === 'manager' ? 'selected' : '' }}>{{ __('Manager') }}</option>
+                    <option value="accountant" {{ old('position') === 'accountant' ? 'selected' : '' }}>{{ __('Accountant') }}</option>
                 </select>
             </div>
 

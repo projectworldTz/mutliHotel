@@ -65,6 +65,9 @@
             <h3 class="font-bold text-slate-900 dark:text-white mb-4">{{ __('Price Breakdown') }}</h3>
             <div class="space-y-2 text-sm">
                 <div class="flex justify-between"><span class="text-slate-500">{{ __('Room') }} ({{ $booking->nights }} {{ __('nights') }} × {{ money($booking->base_price) }})</span><span>{{ money($booking->subtotal) }}</span></div>
+                @foreach($booking->mealPackages as $mp)
+                <div class="flex justify-between"><span class="text-slate-500">{{ $mp->name }} @if($mp->quantity > 1) × {{ $mp->quantity }} @endif</span><span>{{ money($mp->sub_total) }}</span></div>
+                @endforeach
                 @if($booking->discount_amount > 0)
                 <div class="flex justify-between text-emerald-600"><span>{{ __('Discount') }}</span><span>−{{ money($booking->discount_amount) }}</span></div>
                 @endif

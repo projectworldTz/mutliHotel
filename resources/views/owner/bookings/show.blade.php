@@ -28,6 +28,20 @@
             <p>{{ $booking->special_requests }}</p>
         </div>
         @endif
+
+        @if($booking->mealPackages->isNotEmpty())
+        <div class="rounded-xl bg-slate-50 dark:bg-slate-700/50 p-3 text-sm mt-3">
+            <p class="font-semibold mb-2">{{ __('Meal Packages & Add-ons') }}</p>
+            <div class="space-y-1">
+                @foreach($booking->mealPackages as $mp)
+                <div class="flex justify-between">
+                    <span>{{ $mp->name }} @if($mp->quantity > 1) × {{ $mp->quantity }} @endif</span>
+                    <span class="font-medium">{{ money($mp->sub_total) }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
 
     <div class="space-y-3">

@@ -10,12 +10,14 @@ class EnsureHotelStaff
 {
     private const STAFF_ROLES = ['receptionist', 'manager', 'cashier'];
 
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
 
-        if (! $user || ! $user->hasAnyRole(self::STAFF_ROLES)) {
+        $allowedRoles = $roles ?: self::STAFF_ROLES;
+
+        if (! $user || ! $user->hasAnyRole($allowedRoles)) {
             abort(403, 'Access denied.');
         }
 

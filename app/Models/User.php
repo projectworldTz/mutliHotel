@@ -74,6 +74,11 @@ class User extends Authenticatable
         return $this->hasRole('receptionist');
     }
 
+    public function isAccountant(): bool
+    {
+        return $this->hasRole('accountant');
+    }
+
     // ── Hotel relations ───────────────────────────────────────────────────────
 
     /** Hotels this user owns (hotel-owner role) */

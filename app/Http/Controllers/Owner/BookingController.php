@@ -28,7 +28,7 @@ class BookingController extends Controller
         $this->authorizeHotel($hotel);
         abort_unless($booking->hotel_id === $hotel->id, 404);
 
-        $booking->loadMissing(['user', 'rooms.roomType', 'payment', 'invoice']);
+        $booking->loadMissing(['user', 'rooms.roomType', 'payment', 'invoice', 'mealPackages']);
 
         return view('owner.bookings.show', compact('hotel', 'booking'));
     }

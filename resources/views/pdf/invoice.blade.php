@@ -224,6 +224,7 @@
     $statusClass = 'b-' . $invoiceStatus;
 
     $subtotal      = (float) ($invoice?->subtotal        ?? $booking->sub_total    ?? 0);
+    $addonsTotal   = (float) ($invoice?->addons_total    ?? $booking->addons_total ?? 0);
     $taxTotal      = (float) ($invoice?->tax_total       ?? $booking->tax_total    ?? 0);
     $discountTotal = (float) ($invoice?->discount_total  ?? $booking->discount_total ?? 0);
     $grandTotal    = (float) ($invoice?->grand_total     ?? $booking->grand_total  ?? 0);
@@ -415,6 +416,31 @@
         </tbody>
     </table>
 
+    {{-- Meal Packages & Add-ons table --}}
+    @if($booking->mealPackages->isNotEmpty())
+    <div class="sec-lbl">Meal Packages & Add-ons</div>
+    <table class="ctbl">
+        <thead>
+            <tr>
+                <th style="text-align:left; width:55%;">Package</th>
+                <th>Pricing</th>
+                <th>Qty</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($booking->mealPackages as $mp)
+            <tr>
+                <td><strong style="color:#0F2147;">{{ $mp->name }}</strong></td>
+                <td>{{ $currency }} {{ number_format((float) $mp->unit_price, 0) }} / {{ str_replace('_', ' ', $mp->pricing_type) }}</td>
+                <td>{{ $mp->quantity }}</td>
+                <td><strong>{{ $currency }} {{ number_format((float) $mp->sub_total, 0) }}</strong></td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+
     {{-- Totals + Payment --}}
     <table style="width:100%; border-collapse:collapse;">
         <tr>
@@ -457,6 +483,12 @@
                         <td class="tl">Subtotal</td>
                         <td class="tv">{{ $currency }} {{ number_format($subtotal, 0) }}</td>
                     </tr>
+                    @if($addonsTotal > 0)
+                    <tr>
+                        <td class="tl">Add-ons</td>
+                        <td class="tv">{{ $currency }} {{ number_format($addonsTotal, 0) }}</td>
+                    </tr>
+                    @endif
                     @if($discountTotal > 0)
                     <tr style="color:#16A34A;">
                         <td>Discount</td>

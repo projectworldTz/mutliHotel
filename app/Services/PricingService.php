@@ -63,23 +63,26 @@ class PricingService
     }
 
     /**
-     * Build a full order total from a cart subtotal. Taxation is disabled.
+     * Build a full order total from a room subtotal plus any meal-package
+     * add-ons total. Taxation is disabled.
      *
      * Returns:
-     *   subtotal        float
+     *   subtotal        float   — room cost only, unchanged meaning
+     *   addons_total    float   — meal packages / add-ons
      *   tax_rate        float
      *   tax_total       float
      *   discount_total  float
      *   grand_total     float
      */
-    public function calculateOrderTotal(float $subtotal): array
+    public function calculateOrderTotal(float $subtotal, float $addonsTotal = 0.0): array
     {
         return [
             'subtotal'       => $subtotal,
+            'addons_total'   => $addonsTotal,
             'tax_rate'       => 0.0,
             'tax_total'      => 0.0,
             'discount_total' => 0.0,
-            'grand_total'    => max(0, round($subtotal, 2)),
+            'grand_total'    => max(0, round($subtotal + $addonsTotal, 2)),
         ];
     }
 

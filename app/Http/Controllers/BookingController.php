@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Feature;
 use App\Events\BookingCreated;
 use App\Http\Requests\StoreBookingRequest;
+use App\Models\RoomType;
 use App\Models\User;
+use App\Repositories\RoomRepository;
 use App\Services\BookingService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
@@ -17,6 +20,7 @@ class BookingController extends Controller
         private BookingService $bookingService,
         private PaymentService $paymentService,
         private InvoiceService $invoiceService,
+        private RoomRepository $roomRepository,
     ) {}
 
     /**
@@ -35,13 +39,17 @@ class BookingController extends Controller
 
         $hotel = $cart->items->first()?->roomType?->hotel;
 
+        $upsellingEnabled = (bool) $hotel?->hasFeature(Feature::UPSELLING);
+        $mealPackages   = $upsellingEnabled ? $hotel->mealPackages()->active()->get() : collect();
+        $upgradeOptions = $upsellingEnabled ? $this->buildUpgradeOptions($hotel, $cart) : [];
+
         // Owner has switched off online payment — show manual numbers instead of a gateway picker
         if ($hotel?->manual_payment_enabled) {
             $manualPayment = true;
             $manualNumbers = $hotel->manualPaymentNumbers();
             $gateways      = [];
 
-            return view('booking.checkout', compact('cart', 'gateways', 'hotel', 'manualPayment', 'manualNumbers'));
+            return view('booking.checkout', compact('cart', 'gateways', 'hotel', 'manualPayment', 'manualNumbers', 'mealPackages', 'upgradeOptions'));
         }
 
         // Resolve which payment methods the hotel owner has enabled
@@ -51,7 +59,53 @@ class BookingController extends Controller
         $manualPayment = false;
         $manualNumbers = [];
 
-        return view('booking.checkout', compact('cart', 'gateways', 'hotel', 'manualPayment', 'manualNumbers'));
+        return view('booking.checkout', compact('cart', 'gateways', 'hotel', 'manualPayment', 'manualNumbers', 'mealPackages', 'upgradeOptions'));
+    }
+
+    /**
+     * For each cart item, find higher-tier room types (by base_price) in the
+     * same hotel that have at least one room free for that item's exact stay
+     * window — offered as a paid upgrade at checkout. Keyed by cart item id.
+     */
+    private function buildUpgradeOptions(\App\Models\Hotel $hotel, \App\Models\ReservationCart $cart): array
+    {
+        $options = [];
+        $availabilityCache = [];
+
+        foreach ($cart->items as $item) {
+            $currentType = $item->roomType;
+            if (! $currentType) {
+                continue;
+            }
+
+            $dateKey = $item->check_in . '_' . $item->check_out;
+            if (! isset($availabilityCache[$dateKey])) {
+                $availabilityCache[$dateKey] = $this->roomRepository->availableCountPerType(
+                    $hotel, $item->check_in, $item->check_out
+                );
+            }
+            $availableCounts = $availabilityCache[$dateKey];
+
+            $candidates = RoomType::where('hotel_id', $hotel->id)
+                ->where('id', '!=', $currentType->id)
+                ->where('base_price', '>', $currentType->base_price)
+                ->active()
+                ->orderBy('base_price')
+                ->get()
+                ->filter(fn ($rt) => ($availableCounts[$rt->id] ?? 0) > 0)
+                ->map(fn ($rt) => [
+                    'room_type_id'  => $rt->id,
+                    'name'          => $rt->name,
+                    'nightly_diff'  => (float) $rt->base_price - (float) $currentType->base_price,
+                ])
+                ->values();
+
+            if ($candidates->isNotEmpty()) {
+                $options[$item->id] = $candidates;
+            }
+        }
+
+        return $options;
     }
 
     /**
@@ -117,7 +171,7 @@ class BookingController extends Controller
 
         abort_unless($booking->user_id === Auth::id() || $user->isSuperAdmin(), 403);
 
-        $booking->loadMissing(['hotel.images', 'rooms.roomType', 'payment', 'invoice']);
+        $booking->loadMissing(['hotel.images', 'rooms.roomType', 'payment', 'invoice', 'mealPackages']);
 
         return view('booking.show', compact('booking'));
     }
